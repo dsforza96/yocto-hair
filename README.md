@@ -1,2 +1,2 @@
-# yocto-hair
-Tiny path tracer extension to shade realistic-looking hairs
+# Yocto/Hair: Tiny Path Tracer Extension to Shade Realistic-Looking Hairs
+
