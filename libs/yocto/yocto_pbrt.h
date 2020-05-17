@@ -116,6 +116,7 @@ struct shape {
   std::vector<vec3f> normals   = {};
   std::vector<vec2f> texcoords = {};
   std::vector<vec3i> triangles = {};
+  std::vector<vec2i> lines = {};
   // material
   pbrt::material* material = nullptr;
 };
@@ -1741,6 +1742,29 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     if (!get_value(command.values, "radius", radius)) return parse_error();
     make_disk(shape->triangles, shape->positions, shape->normals,
         shape->texcoords, {32, 1}, radius);
+    return true;
+  } else if (command.type == "curve") {
+    // Load curve type
+    shape->positions = {};
+    shape->lines = {};
+
+    float width0 = 0;
+    float width1 = 0;
+    std::string curve_type;
+    int size_prec = (int) shape->positions.size();
+
+    if (!get_value(command.values, "P", shape->positions)) return parse_error();
+    if (!get_value(command.values, "width0", width0)) return parse_error();
+    if (!get_value(command.values, "width1", width1)) return parse_error();
+    if (!get_value(command.values, "type", curve_type)) return parse_error();
+
+   
+    for ( auto i = size_prec; i < shape->positions.size(); i++) {
+      if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
+    }
+    shape->normals.resize(shape->positions.size());
+    
+    
     return true;
   } else {
     return type_error();
