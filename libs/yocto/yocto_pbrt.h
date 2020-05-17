@@ -1752,13 +1752,26 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     float width1 = 0;
     std::string curve_type;
     int size_prec = (int) shape->positions.size();
+    std::vector<vec3f> beziers = {};
 
-    if (!get_value(command.values, "P", shape->positions)) return parse_error();
+    if (!get_value(command.values, "P", beziers)) return parse_error();
     if (!get_value(command.values, "width0", width0)) return parse_error();
     if (!get_value(command.values, "width1", width1)) return parse_error();
     if (!get_value(command.values, "type", curve_type)) return parse_error();
 
-   
+    auto p0 = beziers[0];
+    auto p1 = beziers[1];
+    auto p2 = beziers[2];
+    auto p3 = beziers[3];
+
+    auto value_to_add = 1.0f / 8.0f;
+    auto sum = 0.0f;
+    for (auto i = 0; i < 8; i++) {
+      shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
+      sum += value_to_add;
+      if (sum > 1.0f) sum = 1.0f;
+    }
+    
     for ( auto i = size_prec; i < shape->positions.size(); i++) {
       if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
     }
