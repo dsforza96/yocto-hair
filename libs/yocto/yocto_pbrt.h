@@ -92,6 +92,7 @@ struct material {
   float       metallic        = 0;
   float       transmission    = 0;
   float       roughness       = 0;
+  float       eumelanin       = 0;
   float       ior             = 1.5;
   float       opacity         = 1;
   std::string color_tex       = "";
@@ -1477,8 +1478,11 @@ inline bool convert_material(pbrt::material* pmaterial, const command& command,
       return parse_error();
     return true;
   } else if (command.type == "hair") {
+    pmaterial->eumelanin = 0;
     if (!get_texture(command.values, "color", pmaterial->color,
             pmaterial->color_tex, vec3f{0}))
+      return parse_error();
+    if (!get_value(command.values, "eumelanin", pmaterial->eumelanin))
       return parse_error();
     pmaterial->roughness = 1;
     if (verbose) printf("hair material not properly supported\n");

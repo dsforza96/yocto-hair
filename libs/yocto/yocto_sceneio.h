@@ -145,6 +145,7 @@ struct material {
   float trdepth      = 0.01;
   float opacity      = 1;
   float displacement = 0;
+  float eumelanin    = 0;
   bool  thin         = true;
 
   // textures

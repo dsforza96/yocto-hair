@@ -2530,6 +2530,7 @@ static bool load_pbrt_scene(const std::string& filename, scn::model* scene,
     material->specular     = pmaterial->specular;
     material->transmission = pmaterial->transmission;
     material->ior          = pmaterial->ior;
+    material->eumelanin    = pmaterial->eumelanin;
     material->roughness    = pmaterial->roughness;
     material->opacity      = pmaterial->opacity;
     material->thin         = pmaterial->thin;
