@@ -82,7 +82,11 @@
     "set": "cpp",
     "valarray": "cpp",
     "__memory": "cpp",
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "condition_variable": "cpp",
+    "memory_resource": "cpp",
+    "random": "cpp",
+    "cinttypes": "cpp"
   },
   "json.schemas": [
     {
