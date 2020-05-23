@@ -37,11 +37,14 @@
 
 #include <yocto/yocto_image.h>
 #include <yocto/yocto_math.h>
-#include <yocto/yocto_sceneio.h>
 
 #include <atomic>
 #include <future>
 #include <memory>
+
+namespace yocto::pathtrace {
+    struct material;
+}
 
 // -----------------------------------------------------------------------------
 // ALIASES
@@ -68,6 +71,8 @@ using math::vec4f;
 using math::vec4i;
 using math::zero2f;
 using math::zero3f;
+using math::clamp;
+using math::max;
 
 }  // namespace yocto::pathtrace
 
@@ -75,6 +80,49 @@ using math::zero3f;
 // HIGH LEVEL API
 // -----------------------------------------------------------------------------
 namespace yocto::extension {
+
+static const int   p_max           = 3;
+static const float sqrt_pi_over_8f = 0.626657069f;
+
+struct hair_brdf {
+  vec3f sigma_a = zero3f;
+  float beta_m  = 0.3;
+  float beta_n  = 0.3;
+  float alpha   = 2;
+  float eta     = 1.55;
+
+  // Private data
+  float                        h       = 0;
+  float                        gamma_o = 0;
+  std::array<float, p_max + 1> v;
+  float                        s = 0;
+  std::array<float, p_max>     sin_2k_alpha;
+  std::array<float, p_max>     cos_2k_alpha;
+};
+
+inline float sqr(float v) { return v * v; }
+
+template <int n>
+static float pow(float v) {
+  float n2 = pow<n / 2>(v);
+  return n2 * n2 * pow<n & 1>(v);
+}
+
+template <>
+inline float pow<1>(float v) {
+  return v;
+}
+
+template <>
+inline float pow<0>(float v) {
+  return 1;
+}
+
+inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
+
+inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
+
+// static hair_brdf eval_hair_brdf(const pathtrace::material* material, float h);
 
 }  // namespace yocto::pathtrace
 

@@ -79,6 +79,15 @@ using yocto::shape::make_edge_map;
 using yocto::shape::quads_to_triangles;
 using yocto::shape::split_facevarying;
 
+using yocto::extension::p_max;
+using yocto::extension::sqrt_pi_over_8f;
+using yocto::extension::sqr;
+using yocto::extension::pow;
+using yocto::extension::safe_asin;
+using yocto::extension::safe_sqrt;
+
+
+
 }  // namespace yocto::pathtrace
 
 // -----------------------------------------------------------------------------
@@ -344,6 +353,9 @@ struct brdf {
   float metal_pdf        = 0;
   float transmission_pdf = 0;
   float refraction_pdf   = 0;
+
+  // hair brdf
+  extension::hair_brdf hair_brdf;
 };
 
 // Eval material to obatain emission, brdf and opacity.
@@ -352,6 +364,37 @@ static vec3f eval_emission(const ptr::object* object, int element,
   auto material = object->material;
   auto texcoord = eval_texcoord(object, element, uv);
   return material->emission * eval_texture(material->emission_tex, texcoord);
+}
+
+static extension::hair_brdf eval_hair_brdf(const ptr::material* material, float h) {
+  auto brdf    = extension::hair_brdf{};
+  brdf.sigma_a = material->sigma_a;
+  brdf.beta_m  = material->beta_m;
+  brdf.beta_n  = material->beta_n;
+  brdf.alpha   = material->alpha;
+  brdf.eta     = material->eta;
+
+  brdf.h       = h;
+  brdf.gamma_o = safe_asin(h);
+  brdf.s = sqrt_pi_over_8f * (0.265f * brdf.beta_n + 1.194f * sqr(brdf.beta_n) +
+                                 5.372f * pow<22>(brdf.beta_n));
+
+  brdf.v[0] = sqr(0.726f * brdf.beta_m + 0.812f * sqr(brdf.beta_m) +
+                  3.7f * pow<20>(brdf.beta_m));
+  brdf.v[1] = 0.25 * brdf.v[0];
+  brdf.v[2] = 4 * brdf.v[0];
+  for (int p = 3; p <= p_max; ++p) brdf.v[p] = brdf.v[2];
+
+  brdf.sin_2k_alpha[0] = sin(pif / 180 * brdf.alpha);
+  brdf.cos_2k_alpha[0] = safe_sqrt(1 - sqr(brdf.sin_2k_alpha[0]));
+  for (int i = 1; i < p_max; ++i) {
+    brdf.sin_2k_alpha[i] = 2 * brdf.cos_2k_alpha[i - 1] *
+                           brdf.sin_2k_alpha[i - 1];
+    brdf.cos_2k_alpha[i] = sqr(brdf.cos_2k_alpha[i - 1]) -
+                           sqr(brdf.sin_2k_alpha[i - 1]);
+  }
+
+  return brdf;
 }
 
 // Eval material to obatain emission, brdf and opacity.
@@ -422,6 +465,10 @@ static brdf eval_brdf(const ptr::object* object, int element, const vec2f& uv,
     brdf.transmission_pdf /= pdf_sum;
     brdf.refraction_pdf /= pdf_sum;
   }
+
+  // hair brdf
+  brdf.hair_brdf = eval_hair_brdf(material, 0);
+
   return brdf;
 }
 

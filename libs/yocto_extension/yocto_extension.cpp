@@ -97,28 +97,6 @@ inline float fresnel_dielectric(float eta, float cosw) {
   return (rs * rs + rp * rp) / 2;
 }
 
-inline float sqr(float v) { return v * v; }
-
-template <int n>
-static float pow(float v) {
-  float n2 = pow<n / 2>(v);
-  return n2 * n2 * pow<n & 1>(v);
-}
-
-template <>
-inline float pow<1>(float v) {
-  return v;
-}
-
-template <>
-inline float pow<0>(float v) {
-  return 1;
-}
-
-inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
-
-inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
-
 inline float i0(float x) {
   float   val   = 0;
   float   x2i   = 1;
@@ -133,29 +111,8 @@ inline float i0(float x) {
   }
   return val;
 }
-
-static const int   p_max           = 3;
-static const float sqrt_pi_over_8f = 0.626657069f;
-
-struct hair_brdf {
-  vec3f sigma_a = zero3f;
-  float beta_m  = 0.3;
-  float beta_n  = 0.3;
-  float alpha   = 2;
-  float eta     = 1.55;
-
-  // Private data
-  float                        h       = 0;
-  float                        gamma_o = 0;
-  std::array<float, p_max + 1> v;
-  float                        s = 0;
-  std::array<float, p_max>     sin_2k_alpha;
-  std::array<float, p_max>     cos_2k_alpha;
-};
-
-static hair_brdf eval_hair_brdf(const sceneio::object* object, float h) {
-  auto material = object->material;
-
+/*
+static hair_brdf eval_hair_brdf(const pathtrace::material* material, float h) {
   auto brdf    = hair_brdf{};
   brdf.sigma_a = material->sigma_a;
   brdf.beta_m  = material->beta_m;
@@ -185,7 +142,7 @@ static hair_brdf eval_hair_brdf(const sceneio::object* object, float h) {
 
   return brdf;
 }
-
+*/
 inline float log_i0(float x) {
   if (x > 12)
     return x + 0.5 * (-log(2 * pif) + log(1 / x) + 1 / (8 * x));
@@ -557,17 +514,23 @@ static vec3f sample_hair_scattering(const hair_brdf& brdf, vec3f normal,
     // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
     float sin_theta_op, cos_theta_op;
     if (p == 0) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[1] - cos_theta_o * sin_2k_alpha[1];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[1] + sin_theta_o * sin_2k_alpha[1];
+      sin_theta_op = sin_theta_o * cos_2k_alpha[1] -
+                     cos_theta_o * sin_2k_alpha[1];
+      cos_theta_op = cos_theta_o * cos_2k_alpha[1] +
+                     sin_theta_o * sin_2k_alpha[1];
     }
 
     // Handle remainder of $p$ values for hair scale tilt
     else if (p == 1) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[0] + cos_theta_o * sin_2k_alpha[0];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[0] - sin_theta_o * sin_2k_alpha[0];
+      sin_theta_op = sin_theta_o * cos_2k_alpha[0] +
+                     cos_theta_o * sin_2k_alpha[0];
+      cos_theta_op = cos_theta_o * cos_2k_alpha[0] -
+                     sin_theta_o * sin_2k_alpha[0];
     } else if (p == 2) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[2] + cos_theta_o * sin_2k_alpha[2];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[2] - sin_theta_o * sin_2k_alpha[2];
+      sin_theta_op = sin_theta_o * cos_2k_alpha[2] +
+                     cos_theta_o * sin_2k_alpha[2];
+      cos_theta_op = cos_theta_o * cos_2k_alpha[2] -
+                     sin_theta_o * sin_2k_alpha[2];
     } else {
       sin_theta_op = sin_theta_o;
       cos_theta_op = cos_theta_o;
@@ -575,8 +538,8 @@ static vec3f sample_hair_scattering(const hair_brdf& brdf, vec3f normal,
 
     // Handle out-of-range $\cos \thetao$ from scale adjustment
     cos_theta_op = abs(cos_theta_op);
-    *pdf += mp(cos_theta_o, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) * ap_pdf[p] *
-            np(dphi, p, s, gamma_o, gamma_t);
+    *pdf += mp(cos_theta_o, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) *
+            ap_pdf[p] * np(dphi, p, s, gamma_o, gamma_t);
   }
   *pdf += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
           ap_pdf[p_max] * (1 / (2 * pif));

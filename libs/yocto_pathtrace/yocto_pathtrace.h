@@ -41,6 +41,7 @@
 
 #include <yocto/yocto_image.h>
 #include <yocto/yocto_math.h>
+#include <yocto_extension/yocto_extension.h>
 
 #include <atomic>
 #include <future>
@@ -291,6 +292,14 @@ struct material {
   float trdepth      = 0.01;
   float opacity      = 1;
   bool  thin         = false;
+
+  // hair material
+  float eumelanin = 0;
+  vec3f sigma_a   = zero3f;
+  float beta_m    = 0.3;
+  float beta_n    = 0.3;
+  float alpha     = 2;
+  float eta       = 1.55;
 
   // textures
   ptr::texture* emission_tex     = nullptr;
