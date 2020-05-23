@@ -37,6 +37,7 @@
 
 #include <yocto/yocto_image.h>
 #include <yocto/yocto_math.h>
+#include <yocto/yocto_sceneio.h>
 
 #include <atomic>
 #include <future>

@@ -145,8 +145,15 @@ struct material {
   float trdepth      = 0.01;
   float opacity      = 1;
   float displacement = 0;
-  float eumelanin    = 0;
   bool  thin         = true;
+
+  // hair material
+  float eumelanin = 0;
+  vec3f sigma_a   = zero3f;
+  float beta_m    = 0.3;
+  float beta_n    = 0.3;
+  float alpha     = 2;
+  float eta       = 1.55;
 
   // textures
   scn::texture* emission_tex     = nullptr;
