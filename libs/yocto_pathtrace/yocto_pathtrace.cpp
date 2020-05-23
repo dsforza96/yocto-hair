@@ -79,14 +79,16 @@ using yocto::shape::make_edge_map;
 using yocto::shape::quads_to_triangles;
 using yocto::shape::split_facevarying;
 
+using yocto::extension::eval_hair_scattering;
+using yocto::extension::hair_brdf;
 using yocto::extension::p_max;
-using yocto::extension::sqrt_pi_over_8f;
-using yocto::extension::sqr;
 using yocto::extension::pow;
 using yocto::extension::safe_asin;
 using yocto::extension::safe_sqrt;
-
-
+using yocto::extension::sample_hair_scattering;
+using yocto::extension::sample_hair_scattering_pdf;
+using yocto::extension::sqr;
+using yocto::extension::sqrt_pi_over_8f;
 
 }  // namespace yocto::pathtrace
 
@@ -356,6 +358,7 @@ struct brdf {
 
   // hair brdf
   extension::hair_brdf hair_brdf;
+  bool                 hair = false;
 };
 
 // Eval material to obatain emission, brdf and opacity.
@@ -366,8 +369,8 @@ static vec3f eval_emission(const ptr::object* object, int element,
   return material->emission * eval_texture(material->emission_tex, texcoord);
 }
 
-static extension::hair_brdf eval_hair_brdf(const ptr::material* material, float h) {
-  auto brdf    = extension::hair_brdf{};
+static hair_brdf eval_hair_brdf(const ptr::material* material, float h) {
+  auto brdf    = hair_brdf{};
   brdf.sigma_a = material->sigma_a;
   brdf.beta_m  = material->beta_m;
   brdf.beta_n  = material->beta_n;
@@ -909,6 +912,10 @@ static vec3f eval_emission(
 // Evaluates/sample the BRDF scaled by the cosine of the incoming direction.
 static vec3f eval_brdfcos(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
+  if (brdf.hair) {
+    return eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming);
+  }
+
   if (!brdf.roughness) return zero3f;
 
   // accumulate the lobes
@@ -967,6 +974,10 @@ static vec3f eval_delta(const ptr::brdf& brdf, const vec3f& normal,
 // Picks a direction based on the BRDF
 static vec3f sample_brdfcos(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, float rnl, const vec2f& rn) {
+  if (brdf.hair) {
+    return sample_hair_scattering(brdf.hair_brdf, normal, outgoing, rn);
+  }
+
   if (!brdf.roughness) return zero3f;
 
   auto cdf = 0.0f;
@@ -1049,6 +1060,10 @@ static vec3f sample_delta(const ptr::brdf& brdf, const vec3f& normal,
 // Compute the weight for sampling the BRDF
 static float sample_brdfcos_pdf(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
+  if (brdf.hair) {
+    return sample_hair_scattering_pdf(brdf.hair_brdf, outgoing, incoming);
+  }
+
   if (!brdf.roughness) return 0;
 
   auto pdf = 0.0f;

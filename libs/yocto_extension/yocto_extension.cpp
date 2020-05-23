@@ -111,8 +111,9 @@ inline float i0(float x) {
   }
   return val;
 }
-/*
-static hair_brdf eval_hair_brdf(const pathtrace::material* material, float h) {
+
+/* Moved to yocto_pathtrace.cpp
+hair_brdf eval_hair_brdf(const pathtrace::material* material, float h) {
   auto brdf    = hair_brdf{};
   brdf.sigma_a = material->sigma_a;
   brdf.beta_m  = material->beta_m;
@@ -143,6 +144,7 @@ static hair_brdf eval_hair_brdf(const pathtrace::material* material, float h) {
   return brdf;
 }
 */
+
 inline float log_i0(float x) {
   if (x > 12)
     return x + 0.5 * (-log(2 * pif) + log(1 / x) + 1 / (8 * x));
@@ -203,7 +205,7 @@ inline float np(float phi, int p, float s, float gamma_o, float gamma_t) {
   return trimmed_logistic(dphi, s, -pif, pif);
 }
 
-static vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
+vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   auto h            = brdf.h;
   auto sigma_a      = brdf.sigma_a;
@@ -334,7 +336,7 @@ static std::array<float, p_max + 1> compute_ap_pdf(
   return ap_pdf;
 }
 
-static float sample_hair_scattering_pdf(
+float sample_hair_scattering_pdf(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming) {
   auto h            = brdf.h;
   auto sigma_a      = brdf.sigma_a;
@@ -430,8 +432,8 @@ static float sample_trimmed_logistic(float u, float s, float a, float b) {
   return clamp(x, a, b);
 }
 
-static vec3f sample_hair_scattering(const hair_brdf& brdf, vec3f normal,
-    const vec3f& outgoing, vec3f* incoming, const vec2f& u2, float* pdf) {
+vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
+    const vec3f& outgoing, const vec2f& u2) {
   auto h            = brdf.h;
   auto sigma_a      = brdf.sigma_a;
   auto beta_m       = brdf.beta_n;
@@ -505,6 +507,9 @@ static vec3f sample_hair_scattering(const hair_brdf& brdf, vec3f normal,
 
   // Compute _wi_ from sampled hair scattering angles
   float phi_i = phi_o + dphi;
+
+  return {sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
+  /*
   *incoming   = vec3f{
       sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
 
@@ -545,6 +550,7 @@ static vec3f sample_hair_scattering(const hair_brdf& brdf, vec3f normal,
           ap_pdf[p_max] * (1 / (2 * pif));
   // if (std::abs(wi->x) < .9999) CHECK_NEAR(*pdf, Pdf(wo, *wi), .01);
   return eval_hair_scattering(brdf, normal, outgoing, *incoming);
+  */
 }
 
 }  // namespace yocto::extension

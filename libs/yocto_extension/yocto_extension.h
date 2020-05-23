@@ -43,7 +43,7 @@
 #include <memory>
 
 namespace yocto::pathtrace {
-    struct material;
+struct material;
 }
 
 // -----------------------------------------------------------------------------
@@ -58,8 +58,10 @@ namespace img = yocto::image;
 // Math defitions
 using math::bbox3f;
 using math::byte;
+using math::clamp;
 using math::frame3f;
 using math::identity3x4f;
+using math::max;
 using math::ray3f;
 using math::rng_state;
 using math::vec2f;
@@ -71,10 +73,8 @@ using math::vec4f;
 using math::vec4i;
 using math::zero2f;
 using math::zero3f;
-using math::clamp;
-using math::max;
 
-}  // namespace yocto::pathtrace
+}  // namespace yocto::extension
 
 // -----------------------------------------------------------------------------
 // HIGH LEVEL API
@@ -122,8 +122,17 @@ inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
 
 inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
 
-// static hair_brdf eval_hair_brdf(const pathtrace::material* material, float h);
+// hair_brdf eval_hair_brdf(const pathtrace::material* material, float, h);
 
-}  // namespace yocto::pathtrace
+vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
+    const vec3f& outgoing, const vec3f& incoming);
+
+vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
+    const vec3f& outgoing, const vec2f& u2);
+
+float sample_hair_scattering_pdf(
+    const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
+
+}  // namespace yocto::extension
 
 #endif
