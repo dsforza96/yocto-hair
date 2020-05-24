@@ -96,8 +96,10 @@ struct hair_brdf {
   float                        gamma_o = 0;
   std::array<float, p_max + 1> v;
   float                        s = 0;
-  std::array<float, 3>     sin_2k_alpha;
-  std::array<float, 3>     cos_2k_alpha;
+  std::array<float, 3>         sin_2k_alpha;
+  std::array<float, 3>         cos_2k_alpha;
+
+  frame3f frame = {};
 };
 
 inline float sqr(float v) { return v * v; }
@@ -132,6 +134,25 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
 
 float sample_hair_scattering_pdf(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
+
+static vec3f sigma_a_from_concentration(float ce, float cp) {
+  vec3f sigma_a;
+  vec3f eumelanin_sigma_a   = {0.419f, 0.697f, 1.37f};
+  vec3f pheomelanin_sigma_a = {0.187f, 0.4f, 1.05f};
+  for (int i = 0; i < 3; ++i)
+    sigma_a[i] = (ce * eumelanin_sigma_a[i] + cp * pheomelanin_sigma_a[i]);
+  return sigma_a;
+}
+
+static vec3f sigma_a_from_reflectance(const vec3f& c, float beta_n) {
+  vec3f sigma_a;
+  for (int i = 0; i < 3; ++i)
+    sigma_a[i] = sqr(
+        log(c[i]) / (5.969f - 0.215f * beta_n + 2.532f * sqr(beta_n) -
+                        10.73f * pow<3>(beta_n) + 5.574f * pow<4>(beta_n) +
+                        0.245f * pow<5>(beta_n)));
+  return sigma_a;
+}
 
 }  // namespace yocto::extension
 

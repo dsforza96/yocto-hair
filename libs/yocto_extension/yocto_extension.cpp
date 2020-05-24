@@ -211,8 +211,8 @@ inline float np(float phi, int p, float s, float gamma_o, float gamma_t) {
 }
 
 vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
-    const vec3f& outgoing, const vec3f& incoming) {
-  auto sigma_a      = brdf.sigma_a;
+    const vec3f& outgoing_, const vec3f& incoming_) {
+  auto sigma_a = brdf.sigma_a;
   // auto beta_m       = brdf.beta_n;
   // auto beta_n       = brdf.beta_m;
   auto eta          = brdf.eta;
@@ -222,20 +222,10 @@ vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
+  auto frame = brdf.frame;
 
-  // Compute hair coordinate system terms related to _wo_
-  /*
-  float cos_theta_o = dot(normal, outgoing);
-  float sin_theta_o = safe_sqrt(1.0f - sqr(cos_theta_o));
-  auto  ortho_o     = orthonormalize(normal, outgoing);  // TODO: test
-  float phi_o       = atan2(ortho_o.z, ortho_o.y);
-
-  // Compute hair coordinate system terms related to _wi_
-  float cos_theta_i = dot(normal, incoming);
-  float sin_theta_i = safe_sqrt(1.0f - sqr(cos_theta_i));
-  auto  ortho_i     = orthonormalize(normal, incoming);  // TODO: test
-  float phi_i       = atan2(ortho_i.z, ortho_i.y);
-  */
+  auto outgoing = transform_direction(frame, outgoing_);
+  auto incoming = transform_direction(frame, incoming_);
 
   // Compute hair coordinate system terms related to _wo_
   float sin_theta_o = outgoing.x;
@@ -260,9 +250,9 @@ vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   vec3f T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
 
   // Evaluate hair BSDF
-  float                        phi = phi_i - phi_o;
-  std::array<vec3f, p_max + 1> ap  = extension::ap(cos_theta_o, eta, h, T);
-  vec3f fsum = zero3f;
+  float                        phi  = phi_i - phi_o;
+  std::array<vec3f, p_max + 1> ap   = extension::ap(cos_theta_o, eta, h, T);
+  vec3f                        fsum = zero3f;
   for (int p = 0; p < p_max; ++p) {
     // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
     float sin_theta_op, cos_theta_op;
@@ -339,7 +329,7 @@ static std::array<float, p_max + 1> compute_ap_pdf(
 }
 
 float sample_hair_scattering_pdf(
-    const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming) {
+    const hair_brdf& brdf, const vec3f& outgoing_, const vec3f& incoming_) {
   // auto sigma_a      = brdf.sigma_a;
   // auto beta_m       = brdf.beta_n;
   // auto beta_n       = brdf.beta_m;
@@ -350,6 +340,10 @@ float sample_hair_scattering_pdf(
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
+  auto frame = brdf.frame;
+
+  auto outgoing = transform_direction(frame, outgoing_);
+  auto incoming = transform_direction(frame, incoming_);
 
   // Compute hair coordinate system terms related to _wo_
   float sin_theta_o = outgoing.x;
@@ -435,7 +429,7 @@ static float sample_trimmed_logistic(float u, float s, float a, float b) {
 }
 
 vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
-    const vec3f& outgoing, const vec2f& u2) {
+    const vec3f& outgoing_, const vec2f& u2) {
   // auto sigma_a      = brdf.sigma_a;
   // auto beta_m       = brdf.beta_n;
   // auto beta_n       = brdf.beta_m;
@@ -446,6 +440,9 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
+  auto frame = brdf.frame;
+
+  auto outgoing = transform_direction(frame, outgoing_);
 
   // Compute hair coordinate system terms related to _wo_
   float sin_theta_o = outgoing.x;
@@ -510,7 +507,8 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   // Compute _wi_ from sampled hair scattering angles
   float phi_i = phi_o + dphi;
 
-  return {sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
+  auto incoming = vec3f{sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
+  return transform_direction(inverse(frame), incoming);
   /*
   *incoming   = vec3f{
       sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
@@ -545,7 +543,7 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
 
     // Handle out-of-range $\cos \thetao$ from scale adjustment
     cos_theta_op = abs(cos_theta_op);
-    *pdf += mp(cos_theta_o, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) *
+    *pdf += mp(cos_theta_i, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) *
             ap_pdf[p] * np(dphi, p, s, gamma_o, gamma_t);
   }
   *pdf += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
