@@ -1779,7 +1779,7 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     for ( auto i = size_prec; i < shape->positions.size(); i++) {
       if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
     }
-    shape->normals.resize(shape->positions.size());
+    // shape->normals.resize(shape->positions.size());
     
     
     return true;
