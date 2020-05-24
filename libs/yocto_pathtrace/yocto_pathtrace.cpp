@@ -358,7 +358,7 @@ struct brdf {
 
   // hair brdf
   extension::hair_brdf hair_brdf;
-  bool                 hair = true;
+  bool                 hair = false;
 };
 
 // Eval material to obatain emission, brdf and opacity.
