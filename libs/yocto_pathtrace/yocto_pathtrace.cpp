@@ -358,7 +358,7 @@ struct brdf {
 
   // hair brdf
   extension::hair_brdf hair_brdf;
-  bool                 hair = false;
+  bool                 hair = true;
 };
 
 // Eval material to obatain emission, brdf and opacity.
@@ -369,7 +369,7 @@ static vec3f eval_emission(const ptr::object* object, int element,
   return material->emission * eval_texture(material->emission_tex, texcoord);
 }
 
-static hair_brdf eval_hair_brdf(const ptr::material* material, float h) {
+static hair_brdf eval_hair_brdf(const ptr::material* material, float v) {
   auto brdf    = hair_brdf{};
   brdf.sigma_a = material->sigma_a;
   brdf.beta_m  = material->beta_m;
@@ -377,8 +377,8 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float h) {
   brdf.alpha   = material->alpha;
   brdf.eta     = material->eta;
 
-  brdf.h       = h;
-  brdf.gamma_o = safe_asin(h);
+  brdf.h       = -1.0f + 2.0f * v;
+  brdf.gamma_o = safe_asin(brdf.h);
   brdf.s = sqrt_pi_over_8f * (0.265f * brdf.beta_n + 1.194f * sqr(brdf.beta_n) +
                                  5.372f * pow<22>(brdf.beta_n));
 
@@ -470,7 +470,7 @@ static brdf eval_brdf(const ptr::object* object, int element, const vec2f& uv,
   }
 
   // hair brdf
-  brdf.hair_brdf = eval_hair_brdf(material, 0);
+  brdf.hair_brdf = eval_hair_brdf(material, uv.y);
 
   return brdf;
 }
