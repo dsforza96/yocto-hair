@@ -96,8 +96,8 @@ struct hair_brdf {
   float                        gamma_o = 0;
   std::array<float, p_max + 1> v;
   float                        s = 0;
-  std::array<float, p_max>     sin_2k_alpha;
-  std::array<float, p_max>     cos_2k_alpha;
+  std::array<float, 3>     sin_2k_alpha;
+  std::array<float, 3>     cos_2k_alpha;
 };
 
 inline float sqr(float v) { return v * v; }

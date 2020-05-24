@@ -379,8 +379,6 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v) {
 
   brdf.h       = -1.0f + 2.0f * v;
   brdf.gamma_o = safe_asin(brdf.h);
-  brdf.s = sqrt_pi_over_8f * (0.265f * brdf.beta_n + 1.194f * sqr(brdf.beta_n) +
-                                 5.372f * pow<22>(brdf.beta_n));
 
   brdf.v[0] = sqr(0.726f * brdf.beta_m + 0.812f * sqr(brdf.beta_m) +
                   3.7f * pow<20>(brdf.beta_m));
@@ -388,9 +386,12 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v) {
   brdf.v[2] = 4 * brdf.v[0];
   for (int p = 3; p <= p_max; ++p) brdf.v[p] = brdf.v[2];
 
+  brdf.s = sqrt_pi_over_8f * (0.265f * brdf.beta_n + 1.194f * sqr(brdf.beta_n) +
+                                 5.372f * pow<22>(brdf.beta_n));
+
   brdf.sin_2k_alpha[0] = sin(pif / 180 * brdf.alpha);
   brdf.cos_2k_alpha[0] = safe_sqrt(1 - sqr(brdf.sin_2k_alpha[0]));
-  for (int i = 1; i < p_max; ++i) {
+  for (int i = 1; i < 3; ++i) {
     brdf.sin_2k_alpha[i] = 2 * brdf.cos_2k_alpha[i - 1] *
                            brdf.sin_2k_alpha[i - 1];
     brdf.cos_2k_alpha[i] = sqr(brdf.cos_2k_alpha[i - 1]) -
