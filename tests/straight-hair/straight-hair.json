@@ -20,9 +20,9 @@
   "environments": {
     "sky": {
       "emission": [
-        2,
-        2,
-        2
+        1,
+        1,
+        1
       ],
       "emission_tex": "skydome",
       "frame": [
@@ -59,6 +59,36 @@
       ],
       "shape": "straight",
       "material": "blonde"
+    },
+    "arealight1": {
+      "lookat": [
+        -50,
+        100,
+        150,
+        0,
+        15,
+        0,
+        0,
+        1,
+        0
+      ],
+      "shape": "arealight",
+      "material": "arealight"
+    },
+    "arealight2": {
+      "lookat": [
+        50,
+        100,
+        150,
+        0,
+        15,
+        0,
+        0,
+        1,
+        0
+      ],
+      "shape": "arealight",
+      "material": "arealight"
     }
   },
   "materials": {
@@ -67,6 +97,13 @@
         1,
         1,
         1
+      ]
+    },
+    "arealight": {
+      "emission": [
+        20,
+        20,
+        20
       ]
     }
   }
