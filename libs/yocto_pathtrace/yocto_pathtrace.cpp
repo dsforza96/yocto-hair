@@ -399,7 +399,7 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
                            sqr(brdf.sin_2k_alpha[i - 1]);
   }
 
-  brdf.frame = frame_fromzx(zero3f, normal, tangent);
+  brdf.frame = inverse(frame_fromzx(zero3f, normal, tangent));
 
   return brdf;
 }

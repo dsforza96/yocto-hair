@@ -222,7 +222,7 @@ vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
-  auto frame = brdf.frame;
+  auto frame        = brdf.frame;
 
   auto outgoing = transform_direction(frame, outgoing_);
   auto incoming = transform_direction(frame, incoming_);
@@ -340,7 +340,7 @@ float sample_hair_scattering_pdf(
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
-  auto frame = brdf.frame;
+  auto frame        = brdf.frame;
 
   auto outgoing = transform_direction(frame, outgoing_);
   auto incoming = transform_direction(frame, incoming_);
@@ -440,7 +440,7 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
-  auto frame = brdf.frame;
+  auto frame        = brdf.frame;
 
   auto outgoing = transform_direction(frame, outgoing_);
 
@@ -507,7 +507,8 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   // Compute _wi_ from sampled hair scattering angles
   float phi_i = phi_o + dphi;
 
-  auto incoming = vec3f{sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
+  auto incoming = vec3f{
+      sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
   return transform_direction(inverse(frame), incoming);
   /*
   *incoming   = vec3f{
