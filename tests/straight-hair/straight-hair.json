@@ -1,0 +1,73 @@
+{
+  "cameras": {
+    "default": {
+      "lens": 0.05,
+      "aperture": 0.0,
+      "aspect": 1.0,	
+      "lookat": [
+        0,
+        80,
+        150,
+        0,
+        15,
+        0,
+        0,
+        1,
+        0
+      ]
+    }
+  },
+  "environments": {
+    "sky": {
+      "emission": [
+        2,
+        2,
+        2
+      ],
+      "emission_tex": "skydome",
+      "frame": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "objects": {
+    "hair": {
+      "frame": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0
+      ],
+      "shape": "straight",
+      "material": "blonde"
+    }
+  },
+  "materials": {
+    "blonde": {
+      "color" : [
+        1,
+        1,
+        1
+      ]
+    }
+  }
+}
