@@ -1088,7 +1088,7 @@ static vec3f eval_emission(
 static vec3f eval_brdfcos(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   if (brdf.hair) {
-    return abs(dot(normal, incoming)) * abs(dot(normal, outgoing)) * eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming);
+    return abs(dot(normal, incoming)) * eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming);
   }
 
   if (!brdf.roughness) return zero3f;
