@@ -117,6 +117,7 @@ struct shape {
   std::vector<vec3f> normals   = {};
   std::vector<vec2f> texcoords = {};
   std::vector<vec3i> triangles = {};
+  std::vector<float> radius    = {};
   std::vector<vec2i> lines = {};
   // material
   pbrt::material* material = nullptr;
@@ -365,7 +366,7 @@ struct value {
   // Pbrt value type
   enum struct type_t {
     // clang-format off
-    real, integer, boolean, string, point, normal, vector, texture, color, 
+    real, integer, boolean, string, point, normal, vector, texture, color,
     point2, vector2, spectrum
     // clang-format on
   };
@@ -1751,6 +1752,7 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     // Load curve type
     shape->positions = {};
     shape->lines = {};
+    shape->radius = {};
 
     float width0 = 0;
     float width1 = 0;
@@ -1768,20 +1770,27 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     auto p2 = beziers[2];
     auto p3 = beziers[3];
 
-    auto value_to_add = 1.0f / 8.0f;
-    auto sum = 0.0f;
-    for (auto i = 0; i < 8; i++) {
-      shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
-      sum += value_to_add;
-      if (sum > 1.0f) sum = 1.0f;
-    }
-    
+    // auto value_to_add = 1.0f / 8.0f;
+    // auto sum = 0.0f;
+    // for (auto i = 0; i < 8; i++) {
+    //   shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
+    //   sum += value_to_add;
+    //   if (sum > 1.0f) sum = 1.0f;
+    // }
+
+    shape->positions.push_back(p0);
+    shape->positions.push_back(p3);
+
     for ( auto i = size_prec; i < shape->positions.size(); i++) {
       if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
     }
-    // shape->normals.resize(shape->positions.size());
-    
-    
+
+    // shape->normals.push_back(p1);
+    // shape->normals.push_back(p2);
+  
+    shape->radius.push_back(width0);
+    shape->radius.push_back(width1);
+
     return true;
   } else {
     return type_error();

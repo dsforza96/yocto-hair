@@ -2575,6 +2575,7 @@ static bool load_pbrt_scene(const std::string& filename, scn::model* scene,
     object->shape->texcoords = pshape->texcoords;
     object->shape->triangles = pshape->triangles;
     object->shape->lines = pshape->lines;
+    object->shape->radius = pshape->radius;
     for (auto& uv : object->shape->texcoords) uv.y = 1 - uv.y;
     object->material = material_map.at(pshape->material);
   }
