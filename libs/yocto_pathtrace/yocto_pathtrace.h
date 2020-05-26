@@ -47,6 +47,10 @@
 #include <future>
 #include <memory>
 
+#ifdef YOCTO_EMBREE
+#include <embree3/rtcore.h>
+#endif
+
 // -----------------------------------------------------------------------------
 // ALIASES
 // -----------------------------------------------------------------------------
@@ -351,6 +355,10 @@ struct shape {
   // computed properties
   bvh_tree* bvh = nullptr;
 
+  #ifdef YOCTO_EMBREE
+    RTCScene embree_bvh = nullptr;
+  #endif
+
   // cleanup
   ~shape();
 };
@@ -396,6 +404,10 @@ struct scene {
 
   // computed properties
   bvh_tree* bvh = nullptr;
+
+  #ifdef YOCTO_EMBREE
+    RTCScene embree_bvh = nullptr;
+  #endif
 
   // cleanup
   ~scene();
