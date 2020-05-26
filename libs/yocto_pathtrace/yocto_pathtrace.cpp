@@ -38,8 +38,9 @@
 using namespace std::string_literals;
 
 #ifdef YOCTO_EMBREE
-#include <cstring>
 #include <embree3/rtcore.h>
+
+#include <cstring>
 #endif
 
 // -----------------------------------------------------------------------------
@@ -406,15 +407,20 @@ static vec3f eval_emission(const ptr::object* object, int element,
 
 static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
     const vec3f& normal, const vec3f& tangent) {
-  auto brdf    = hair_brdf{};
-  
+  auto brdf = hair_brdf{};
+
   brdf.sigma_a = extension::sigma_a_from_concentration(material->eumelanin, 0);
   brdf.beta_m  = material->beta_m;
   brdf.beta_n  = material->beta_n;
   brdf.alpha   = material->alpha;
   brdf.eta     = material->eta;
 
-  brdf.h       = -1.0f + 2.0f * v;
+#ifdef YOCTO_EMBREE
+  brdf.h = v;
+#else
+  brdf.h = -1.0f + 2.0f * v;
+#endif
+
   brdf.gamma_o = safe_asin(brdf.h);
 
   brdf.v[0] = sqr(0.726f * brdf.beta_m + 0.812f * sqr(brdf.beta_m) +
@@ -675,58 +681,65 @@ static void build_bvh(
 }
 
 static void init_bvh(ptr::shape* shape, const trace_params& params) {
-  #ifdef YOCTO_EMBREE
-    auto edevice = embree_device();
-    shape->embree_bvh = rtcNewScene(edevice);
-    rtcSetSceneBuildQuality(shape->embree_bvh, RTC_BUILD_QUALITY_HIGH);
+#ifdef YOCTO_EMBREE
+  auto edevice      = embree_device();
+  shape->embree_bvh = rtcNewScene(edevice);
+  rtcSetSceneBuildQuality(shape->embree_bvh, RTC_BUILD_QUALITY_HIGH);
 
-    if (!shape->lines.empty()) {
-      auto elines = std::vector<int>{};
-      auto epositions = std::vector<vec4f>{};
-      auto last_index = -1;
+  if (!shape->lines.empty()) {
+    auto elines     = std::vector<int>{};
+    auto epositions = std::vector<vec4f>{};
+    auto last_index = -1;
 
-      for (auto& l : shape->lines) {
-        if (last_index == l.x) {
-          elines.push_back((int)epositions.size() - 1);
-          epositions.push_back({shape->positions[l.y], shape->radius[l.y]});
-        }
-        else {
-          elines.push_back((int)epositions.size());
-          epositions.push_back({shape->positions[l.x], shape->radius[l.x]});
-          epositions.push_back({shape->positions[l.y], shape->radius[l.y]});
-        }
-
-        last_index = l.y;
+    for (auto& l : shape->lines) {
+      if (last_index == l.x) {
+        elines.push_back((int)epositions.size() - 1);
+        epositions.push_back({shape->positions[l.y], shape->radius[l.y]});
+      } else {
+        elines.push_back((int)epositions.size());
+        epositions.push_back({shape->positions[l.x], shape->radius[l.x]});
+        epositions.push_back({shape->positions[l.y], shape->radius[l.y]});
       }
 
-      auto egeometry = rtcNewGeometry(edevice, RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE);
-      rtcSetGeometryVertexAttributeCount(egeometry, 1);
-
-      auto embree_positions = rtcSetNewGeometryBuffer(egeometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT4, 16, epositions.size());
-      auto embree_lines = rtcSetNewGeometryBuffer(egeometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT, 4, elines.size());
-  
-      memcpy(embree_positions, epositions.data(), epositions.size() * 16);
-      memcpy(embree_lines, elines.data(), elines.size() * 4);
-
-      rtcCommitGeometry(egeometry);
-      rtcAttachGeometryByID(shape->embree_bvh, egeometry, 0);
-    }
-    else if (!shape->triangles.empty()) {
-      auto egeometry = rtcNewGeometry(edevice, RTC_GEOMETRY_TYPE_TRIANGLE);
-      rtcSetGeometryVertexAttributeCount(egeometry, 1);
-
-      auto embree_positions = rtcSetNewGeometryBuffer(egeometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 12, shape->positions.size());
-      auto embree_triangles = rtcSetNewGeometryBuffer(egeometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 12, shape->triangles.size());
-
-      memcpy(embree_positions, shape->positions.data(), shape->positions.size() * 12);
-      memcpy(embree_triangles, shape->triangles.data(), shape->triangles.size() * 12);
-
-      rtcCommitGeometry(egeometry);
-      rtcAttachGeometryByID(shape->embree_bvh, egeometry, 0);
+      last_index = l.y;
     }
 
-    return rtcCommitScene(shape->embree_bvh);
-  #endif
+    auto egeometry = rtcNewGeometry(
+        edevice, RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE);
+    rtcSetGeometryVertexAttributeCount(egeometry, 1);
+
+    auto embree_positions = rtcSetNewGeometryBuffer(egeometry,
+        RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT4, 16, epositions.size());
+    auto embree_lines     = rtcSetNewGeometryBuffer(
+        egeometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT, 4, elines.size());
+
+    memcpy(embree_positions, epositions.data(), epositions.size() * 16);
+    memcpy(embree_lines, elines.data(), elines.size() * 4);
+
+    rtcCommitGeometry(egeometry);
+    rtcAttachGeometryByID(shape->embree_bvh, egeometry, 0);
+  } else if (!shape->triangles.empty()) {
+    auto egeometry = rtcNewGeometry(edevice, RTC_GEOMETRY_TYPE_TRIANGLE);
+    rtcSetGeometryVertexAttributeCount(egeometry, 1);
+
+    auto embree_positions = rtcSetNewGeometryBuffer(egeometry,
+        RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 12,
+        shape->positions.size());
+    auto embree_triangles = rtcSetNewGeometryBuffer(egeometry,
+        RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 12,
+        shape->triangles.size());
+
+    memcpy(embree_positions, shape->positions.data(),
+        shape->positions.size() * 12);
+    memcpy(embree_triangles, shape->triangles.data(),
+        shape->triangles.size() * 12);
+
+    rtcCommitGeometry(egeometry);
+    rtcAttachGeometryByID(shape->embree_bvh, egeometry, 0);
+  }
+
+  return rtcCommitScene(shape->embree_bvh);
+#endif
 
   // build primitives
   auto primitives = std::vector<bvh_primitive>{};
@@ -784,27 +797,28 @@ void init_bvh(ptr::scene* scene, const trace_params& params,
   // handle progress
   if (progress_cb) progress_cb("build scene bvh", progress.x++, progress.y);
 
-  #ifdef YOCTO_EMBREE
-    auto edevice = embree_device();
-    scene->embree_bvh = rtcNewScene(edevice);
-    rtcSetSceneBuildQuality(scene->embree_bvh, RTC_BUILD_QUALITY_HIGH);
+#ifdef YOCTO_EMBREE
+  auto edevice      = embree_device();
+  scene->embree_bvh = rtcNewScene(edevice);
+  rtcSetSceneBuildQuality(scene->embree_bvh, RTC_BUILD_QUALITY_HIGH);
 
-    for (auto idx = 0; idx < scene->objects.size(); idx++) {
-      auto object = scene->objects[idx];
-      auto egeometry = rtcNewGeometry(edevice, RTC_GEOMETRY_TYPE_INSTANCE);
+  for (auto idx = 0; idx < scene->objects.size(); idx++) {
+    auto object    = scene->objects[idx];
+    auto egeometry = rtcNewGeometry(edevice, RTC_GEOMETRY_TYPE_INSTANCE);
 
-      rtcSetGeometryInstancedScene(egeometry, object->shape->embree_bvh);
-      rtcSetGeometryTransform(egeometry, 0, RTC_FORMAT_FLOAT3X4_COLUMN_MAJOR, &object->frame);
+    rtcSetGeometryInstancedScene(egeometry, object->shape->embree_bvh);
+    rtcSetGeometryTransform(
+        egeometry, 0, RTC_FORMAT_FLOAT3X4_COLUMN_MAJOR, &object->frame);
 
-      rtcCommitGeometry(egeometry);
-      rtcAttachGeometryByID(scene->embree_bvh, egeometry, idx);
-    }
+    rtcCommitGeometry(egeometry);
+    rtcAttachGeometryByID(scene->embree_bvh, egeometry, idx);
+  }
 
-    // handle progress
-    if (progress_cb) progress_cb("build bvh", progress.x++, progress.y);
+  // handle progress
+  if (progress_cb) progress_cb("build bvh", progress.x++, progress.y);
 
-    return rtcCommitScene(scene->embree_bvh);
-  #endif
+  return rtcCommitScene(scene->embree_bvh);
+#endif
 
   // instance bboxes
   auto primitives = std::vector<bvh_primitive>{};
@@ -837,34 +851,33 @@ void init_bvh(ptr::scene* scene, const trace_params& params,
 // Intersect ray with a bvh->
 static bool intersect_shape_bvh(ptr::shape* shape, const ray3f& ray_,
     int& element, vec2f& uv, float& distance, bool find_any) {
-  #ifdef YOCTO_EMBREE
-    RTCRayHit eray;
-    eray.ray.org_x = ray_.o.x;
-    eray.ray.org_y = ray_.o.y;
-    eray.ray.org_z = ray_.o.z;
-    eray.ray.dir_x = ray_.d.x;
-    eray.ray.dir_y = ray_.d.y;
-    eray.ray.dir_z = ray_.d.z;
-    eray.ray.tnear = ray_.tmin;
-    eray.ray.tfar = ray_.tmax;
-    eray.ray.flags = 0;
-    eray.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-    eray.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
+#ifdef YOCTO_EMBREE
+  RTCRayHit eray;
+  eray.ray.org_x     = ray_.o.x;
+  eray.ray.org_y     = ray_.o.y;
+  eray.ray.org_z     = ray_.o.z;
+  eray.ray.dir_x     = ray_.d.x;
+  eray.ray.dir_y     = ray_.d.y;
+  eray.ray.dir_z     = ray_.d.z;
+  eray.ray.tnear     = ray_.tmin;
+  eray.ray.tfar      = ray_.tmax;
+  eray.ray.flags     = 0;
+  eray.hit.geomID    = RTC_INVALID_GEOMETRY_ID;
+  eray.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
 
-    RTCIntersectContext ctx;
-    rtcInitIntersectContext(&ctx);
+  RTCIntersectContext ctx;
+  rtcInitIntersectContext(&ctx);
 
-    rtcIntersect1(shape->embree_bvh, &ctx, &eray);
+  rtcIntersect1(shape->embree_bvh, &ctx, &eray);
 
-    if (eray.hit.geomID == RTC_INVALID_GEOMETRY_ID) 
-      return false;
+  if (eray.hit.geomID == RTC_INVALID_GEOMETRY_ID) return false;
 
-    element = (int)eray.hit.primID;
-    uv = {eray.hit.u, eray.hit.v};
-    distance = eray.ray.tfar;
+  element  = (int)eray.hit.primID;
+  uv       = {eray.hit.u, eray.hit.v};
+  distance = eray.ray.tfar;
 
-    return true;
-  #endif
+  return true;
+#endif
 
   // get bvh and shape pointers for fast access
   auto bvh = shape->bvh;
@@ -952,35 +965,34 @@ static bool intersect_shape_bvh(ptr::shape* shape, const ray3f& ray_,
 static bool intersect_scene_bvh(const ptr::scene* scene, const ray3f& ray_,
     int& object, int& element, vec2f& uv, float& distance, bool find_any,
     bool non_rigid_frames) {
-  #ifdef YOCTO_EMBREE
-    RTCRayHit eray;
-    eray.ray.org_x = ray_.o.x;
-    eray.ray.org_y = ray_.o.y;
-    eray.ray.org_z = ray_.o.z;
-    eray.ray.dir_x = ray_.d.x;
-    eray.ray.dir_y = ray_.d.y;
-    eray.ray.dir_z = ray_.d.z;
-    eray.ray.tnear = ray_.tmin;
-    eray.ray.tfar = ray_.tmax;
-    eray.ray.flags = 0;
-    eray.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-    eray.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
+#ifdef YOCTO_EMBREE
+  RTCRayHit eray;
+  eray.ray.org_x     = ray_.o.x;
+  eray.ray.org_y     = ray_.o.y;
+  eray.ray.org_z     = ray_.o.z;
+  eray.ray.dir_x     = ray_.d.x;
+  eray.ray.dir_y     = ray_.d.y;
+  eray.ray.dir_z     = ray_.d.z;
+  eray.ray.tnear     = ray_.tmin;
+  eray.ray.tfar      = ray_.tmax;
+  eray.ray.flags     = 0;
+  eray.hit.geomID    = RTC_INVALID_GEOMETRY_ID;
+  eray.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
 
-    RTCIntersectContext ctx;
-    rtcInitIntersectContext(&ctx);
+  RTCIntersectContext ctx;
+  rtcInitIntersectContext(&ctx);
 
-    rtcIntersect1(scene->embree_bvh, &ctx, &eray);
+  rtcIntersect1(scene->embree_bvh, &ctx, &eray);
 
-    if (eray.hit.geomID == RTC_INVALID_GEOMETRY_ID) 
-      return false;
+  if (eray.hit.geomID == RTC_INVALID_GEOMETRY_ID) return false;
 
-    object = (int)eray.hit.instID[0];
-    element = (int)eray.hit.primID;
-    uv = {eray.hit.u, eray.hit.v};
-    distance = eray.ray.tfar;
+  object   = (int)eray.hit.instID[0];
+  element  = (int)eray.hit.primID;
+  uv       = {eray.hit.u, eray.hit.v};
+  distance = eray.ray.tfar;
 
-    return true;
-  #endif
+  return true;
+#endif
 
   // get bvh and scene pointers for fast access
   auto bvh = scene->bvh;
@@ -1088,7 +1100,8 @@ static vec3f eval_emission(
 static vec3f eval_brdfcos(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   if (brdf.hair) {
-    return abs(dot(normal, incoming)) * eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming);
+    return eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming) *
+           abs(dot(normal, incoming));
   }
 
   if (!brdf.roughness) return zero3f;
@@ -2050,20 +2063,18 @@ namespace yocto::pathtrace {
 shape::~shape() {
   if (bvh) delete bvh;
 
-  #ifdef YOCTO_EMBREE
-    if (embree_bvh)
-      rtcReleaseScene(embree_bvh);
-  #endif
+#ifdef YOCTO_EMBREE
+  if (embree_bvh) rtcReleaseScene(embree_bvh);
+#endif
 }
 
 // cleanup
 scene::~scene() {
   if (bvh) delete bvh;
 
-  #ifdef YOCTO_EMBREE
-    if (embree_bvh)
-      rtcReleaseScene(embree_bvh);
-  #endif
+#ifdef YOCTO_EMBREE
+  if (embree_bvh) rtcReleaseScene(embree_bvh);
+#endif
 
   for (auto camera : cameras) delete camera;
   for (auto object : objects) delete object;
@@ -2220,14 +2231,23 @@ void set_metallic(
 void set_ior(ptr::material* material, float ior) { material->ior = ior; }
 // Hair materials
 
-void set_eumelanin(ptr::material* material, float eumelanin) { 
+void set_eumelanin(ptr::material* material, float eumelanin) {
   printf("%f", eumelanin);
   fflush(stdout);
-  material->eumelanin = eumelanin; }
-void set_sigma_a(ptr::material* material, vec3f sigma_a) { material->sigma_a = sigma_a; }
-void set_beta_m(ptr::material* material, float beta_m) { material->beta_m = beta_m; }
-void set_beta_n(ptr::material* material, float beta_n) { material->beta_n = beta_n; }
-void set_alpha(ptr::material* material, float alpha) { material->alpha = alpha; }
+  material->eumelanin = eumelanin;
+}
+void set_sigma_a(ptr::material* material, vec3f sigma_a) {
+  material->sigma_a = sigma_a;
+}
+void set_beta_m(ptr::material* material, float beta_m) {
+  material->beta_m = beta_m;
+}
+void set_beta_n(ptr::material* material, float beta_n) {
+  material->beta_n = beta_n;
+}
+void set_alpha(ptr::material* material, float alpha) {
+  material->alpha = alpha;
+}
 void set_eta(ptr::material* material, float eta) { material->eta = eta; }
 
 void set_transmission(ptr::material* material, float transmission, bool thin,
