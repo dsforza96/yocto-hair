@@ -372,11 +372,12 @@ static vec3f eval_emission(const ptr::object* object, int element,
 static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
     const vec3f& normal, const vec3f& tangent) {
   auto brdf    = hair_brdf{};
-  brdf.sigma_a = extension::sigma_a_from_concentration(1.3, 0);
-  // brdf.beta_m  = material->beta_m;
-  // brdf.beta_n  = material->beta_n;
-  // brdf.alpha   = material->alpha;
-  // brdf.eta     = material->eta;
+  
+  brdf.sigma_a = extension::sigma_a_from_concentration(material->eumelanin, 0);
+  brdf.beta_m  = material->beta_m;
+  brdf.beta_n  = material->beta_n;
+  brdf.alpha   = material->alpha;
+  brdf.eta     = material->eta;
 
   brdf.h       = -1.0f + 2.0f * v;
   brdf.gamma_o = safe_asin(brdf.h);
@@ -918,7 +919,7 @@ static vec3f eval_emission(
 static vec3f eval_brdfcos(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   if (brdf.hair) {
-    return eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming);
+    return abs(dot(normal, incoming)) * abs(dot(normal, outgoing)) * eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming);
   }
 
   if (!brdf.roughness) return zero3f;
@@ -2037,6 +2038,18 @@ void set_metallic(
   material->metallic_tex = metallic_tex;
 }
 void set_ior(ptr::material* material, float ior) { material->ior = ior; }
+// Hair materials
+
+void set_eumelanin(ptr::material* material, float eumelanin) { 
+  printf("%f", eumelanin);
+  fflush(stdout);
+  material->eumelanin = eumelanin; }
+void set_sigma_a(ptr::material* material, vec3f sigma_a) { material->sigma_a = sigma_a; }
+void set_beta_m(ptr::material* material, float beta_m) { material->beta_m = beta_m; }
+void set_beta_n(ptr::material* material, float beta_n) { material->beta_n = beta_n; }
+void set_alpha(ptr::material* material, float alpha) { material->alpha = alpha; }
+void set_eta(ptr::material* material, float eta) { material->eta = eta; }
+
 void set_transmission(ptr::material* material, float transmission, bool thin,
     float trdepth, ptr::texture* transmission_tex) {
   material->transmission     = transmission;

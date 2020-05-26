@@ -113,6 +113,14 @@ void set_texture(ptr::texture* texture, const img::image<vec3f>& img);
 void set_texture(ptr::texture* texture, const img::image<byte>& img);
 void set_texture(ptr::texture* texture, const img::image<float>& img);
 
+
+
+void set_eumelanin(ptr::material* material, float eumelanin);
+void set_sigma_a(ptr::material* material, vec3f sigma_a);
+void set_beta_m(ptr::material* material, float beta_m) ;
+void set_beta_n(ptr::material* material, float beta_n) ;
+void set_alpha(ptr::material* material, float alpha) ;
+void set_eta(ptr::material* material, float eta);
 // material properties
 void set_emission(ptr::material* material, const vec3f& emission,
     ptr::texture* emission_tex = nullptr);

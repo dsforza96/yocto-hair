@@ -1269,6 +1269,15 @@ static bool load_json_scene(const std::string& filename, scn::model* scene,
     for (auto& [name, ejs] : js.at("materials").items()) {
       auto material  = add_material(scene);
       material->name = name;
+
+      // Hair materials
+      if (!get_value(ejs, "eumelanin", material->eumelanin)) return false;
+      if (!get_value(ejs, "sigma_a", material->sigma_a)) return false;
+      if (!get_value(ejs, "beta_m", material->beta_m)) return false;
+      if (!get_value(ejs, "beta_n", material->beta_n)) return false;
+      if (!get_value(ejs, "alpha", material->alpha)) return false;
+      if (!get_value(ejs, "eta", material->eta)) return false;
+
       if (!get_value(ejs, "emission", material->emission)) return false;
       if (!get_value(ejs, "color", material->color)) return false;
       if (!get_value(ejs, "metallic", material->metallic)) return false;
@@ -1473,6 +1482,14 @@ static bool save_json_scene(const std::string& filename,
   if (!scene->materials.empty()) js["materials"] = json::object();
   for (auto material : scene->materials) {
     auto& ejs = js["materials"][material->name];
+
+    add_opt(ejs, "eumelanin", material->eumelanin, def_material.eumelanin);
+    add_opt(ejs, "sigma_a", material->sigma_a, def_material.sigma_a);
+    add_opt(ejs, "beta_m", material->beta_m, def_material.beta_m);
+    add_opt(ejs, "beta_n", material->beta_n, def_material.beta_n);
+    add_opt(ejs, "alpha", material->alpha, def_material.alpha);
+    add_opt(ejs, "eta", material->eta, def_material.eta);
+
     add_opt(ejs, "emission", material->emission, def_material.emission);
     add_opt(ejs, "color", material->color, def_material.color);
     add_opt(ejs, "specular", material->specular, def_material.specular);

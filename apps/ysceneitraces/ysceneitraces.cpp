@@ -134,6 +134,12 @@ void init_scene(ptr::scene* scene, sio::model* ioscene, ptr::camera*& camera,
     if (print_progress)
       print_progress("convert material", progress.x++, progress.y);
     auto material = add_material(scene);
+     set_eumelanin(material, iomaterial->eumelanin);
+    set_sigma_a(material,iomaterial->sigma_a );
+    set_beta_m(material,iomaterial->beta_m );
+    set_beta_n(material,iomaterial->beta_n );
+    set_alpha(material,iomaterial->alpha );
+    set_eta(material,iomaterial->eta );
     set_emission(material, iomaterial->emission,
         texture_map.at(iomaterial->emission_tex));
     set_color(
