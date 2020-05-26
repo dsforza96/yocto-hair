@@ -1785,8 +1785,8 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
       if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
     }
 
-    // shape->normals.push_back(p1);
-    // shape->normals.push_back(p2);
+    shape->normals.push_back((p1 - p0) * 3);
+    shape->normals.push_back((p3 - p2) * 3);
   
     shape->radius.push_back(width0);
     shape->radius.push_back(width1);
