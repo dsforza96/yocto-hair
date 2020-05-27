@@ -1271,6 +1271,7 @@ static bool load_json_scene(const std::string& filename, scn::model* scene,
       material->name = name;
 
       // Hair materials
+      if (!get_value(ejs, "pheomelanin", material->pheomelanin)) return false;
       if (!get_value(ejs, "eumelanin", material->eumelanin)) return false;
       if (!get_value(ejs, "sigma_a", material->sigma_a)) return false;
       if (!get_value(ejs, "beta_m", material->beta_m)) return false;
@@ -1483,6 +1484,8 @@ static bool save_json_scene(const std::string& filename,
   for (auto material : scene->materials) {
     auto& ejs = js["materials"][material->name];
 
+    
+    add_opt(ejs, "pheomelanin", material->pheomelanin, def_material.pheomelanin);
     add_opt(ejs, "eumelanin", material->eumelanin, def_material.eumelanin);
     add_opt(ejs, "sigma_a", material->sigma_a, def_material.sigma_a);
     add_opt(ejs, "beta_m", material->beta_m, def_material.beta_m);

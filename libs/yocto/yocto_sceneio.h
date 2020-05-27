@@ -149,6 +149,7 @@ struct material {
 
   // hair material
   float eumelanin = 0;
+  float pheomelanin = 0;
   vec3f sigma_a   = zero3f;
   float beta_m    = 0.3;
   float beta_n    = 0.3;

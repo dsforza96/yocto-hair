@@ -93,6 +93,7 @@ using yocto::extension::safe_asin;
 using yocto::extension::safe_sqrt;
 using yocto::extension::sample_hair_scattering;
 using yocto::extension::sample_hair_scattering_pdf;
+using yocto::extension::sigma_a_from_concentration;
 using yocto::extension::sqr;
 using yocto::extension::sqrt_pi_over_8f;
 
@@ -409,11 +410,12 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
     const vec3f& normal, const vec3f& tangent) {
   auto brdf = hair_brdf{};
 
-  brdf.sigma_a = extension::sigma_a_from_concentration(material->eumelanin, 0);
-  brdf.beta_m  = material->beta_m;
-  brdf.beta_n  = material->beta_n;
-  brdf.alpha   = material->alpha;
-  brdf.eta     = material->eta;
+  brdf.sigma_a = sigma_a_from_concentration(
+      material->eumelanin, material->pheomelanin);
+  brdf.beta_m = material->beta_m;
+  brdf.beta_n = material->beta_n;
+  brdf.alpha  = material->alpha;
+  brdf.eta    = material->eta;
 
 #ifdef YOCTO_EMBREE
   brdf.h = v;
@@ -2229,12 +2231,13 @@ void set_metallic(
   material->metallic_tex = metallic_tex;
 }
 void set_ior(ptr::material* material, float ior) { material->ior = ior; }
-// Hair materials
 
+// Hair materials
 void set_eumelanin(ptr::material* material, float eumelanin) {
-  printf("%f", eumelanin);
-  fflush(stdout);
   material->eumelanin = eumelanin;
+}
+void set_pheomelanin(ptr::material* material, float pheomelanin) {
+  material->pheomelanin = pheomelanin;
 }
 void set_sigma_a(ptr::material* material, vec3f sigma_a) {
   material->sigma_a = sigma_a;
