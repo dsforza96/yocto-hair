@@ -3,3 +3,5 @@ json
 gltf
 ybin
 pbrt
+**/*.ply
+
