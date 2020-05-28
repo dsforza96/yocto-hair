@@ -410,8 +410,12 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
     const vec3f& normal, const vec3f& tangent) {
   auto brdf = hair_brdf{};
 
-  brdf.sigma_a = sigma_a_from_concentration(
-      material->eumelanin, material->pheomelanin);
+  if (material->sigma_a != zero3f) {
+    brdf.sigma_a = material->sigma_a; 
+  } else {
+    brdf.sigma_a = sigma_a_from_concentration(material->eumelanin, material->pheomelanin);
+  }
+      
   brdf.beta_m = material->beta_m;
   brdf.beta_n = material->beta_n;
   brdf.alpha  = material->alpha;
