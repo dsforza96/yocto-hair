@@ -1,0 +1,135 @@
+{
+  "cameras": {
+    "default": {
+      "lens": 0.05,
+      "aperture": 0.0,
+      "aspect": 1.0,	
+      "lookat": [
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    }
+  },
+  "environments": {
+    "sky": {
+      "emission": [
+        1,
+        1,
+        1
+      ],
+      "emission_tex": "sky",
+      "frame": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "objects": {
+    "sphere": {
+      "frame": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "shape": "sphere",
+      "material": "sphere"
+    },
+    "hairblock": {
+      "frame": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "shape": "hairblock",
+      "material": "hair"
+    },
+    "arealight1": {
+      "lookat": [
+        -5,
+        20,
+        20,
+        0,
+        9.5,
+        0,
+        0,
+        1,
+        0
+      ],
+      "shape": "arealight",
+      "material": "arealight"
+    },
+    "arealight2": {
+      "lookat": [
+        5,
+        20,
+        20,
+        0,
+        9.5,
+        0,
+        0,
+        1,
+        0
+      ],
+      "shape": "arealight",
+      "material": "arealight"
+    }
+  },
+  "materials": {
+    "sphere": {
+      "color": [
+        0.8,
+        0.4,
+        0.05
+      ]
+    },
+    "hair": {
+      "sigma_a": [
+        0.003,
+        0.046,
+        0.488
+      ]
+    },
+    "arealight": {
+      "emission": [
+        20,
+        20,
+        20
+      ]
+    }
+  }
+}
