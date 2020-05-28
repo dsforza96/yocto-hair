@@ -139,8 +139,7 @@ static vec3f sigma_a_from_concentration(float ce, float cp) {
   vec3f sigma_a;
   vec3f eumelanin_sigma_a   = {0.419f, 0.697f, 1.37f};
   vec3f pheomelanin_sigma_a = {0.187f, 0.4f, 1.05f};
-  for (int i = 0; i < 3; ++i)
-    sigma_a[i] = (ce * eumelanin_sigma_a[i] + cp * pheomelanin_sigma_a[i]);
+  sigma_a = (ce * eumelanin_sigma_a + cp * pheomelanin_sigma_a) ;
   return sigma_a;
 }
 

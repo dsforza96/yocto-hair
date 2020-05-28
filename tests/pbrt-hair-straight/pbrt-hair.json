@@ -93,8 +93,7 @@
   },
   "materials": {
     "blonde": {
-      "eumelanin": 1.3,
-      "pheomelanin": 2.0
+      "eumelanin": 1.3
     },
     "arealight": {
       "emission": [
