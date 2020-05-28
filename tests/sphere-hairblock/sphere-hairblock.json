@@ -3,13 +3,13 @@
     "default": {
       "lens": 0.05,
       "aperture": 0.0,
-      "aspect": 1.0,	
+      "aspect": 1.777777778,	
       "lookat": [
-        0,
-        1,
-        2,
-        0,
-        0,
+        -0.5,
+        1.5,
+        5,
+        0.25,
+        0.5,
         0,
         0,
         1,
@@ -23,21 +23,6 @@
         1,
         1,
         1
-      ],
-      "emission_tex": "sky",
-      "frame": [
-        1,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0
       ]
     }
   },
@@ -53,12 +38,12 @@
         0,
         0,
         1,
-        0,
+        -0.5,
         0,
         0
       ],
-      "shape": "sphere",
-      "material": "sphere"
+      "shape": "sphere1",
+      "material": "diffuse"
     },
     "hairblock": {
       "frame": [
@@ -66,51 +51,21 @@
         0,
         0,
         0,
-        1,
-        0,
-        0,
         0,
         1,
         0,
+        -1,
         0,
-        0
+        0.5,
+        1,
+        -0.5
       ],
       "shape": "hairblock",
       "material": "hair"
-    },
-    "arealight1": {
-      "lookat": [
-        -5,
-        20,
-        20,
-        0,
-        9.5,
-        0,
-        0,
-        1,
-        0
-      ],
-      "shape": "arealight",
-      "material": "arealight"
-    },
-    "arealight2": {
-      "lookat": [
-        5,
-        20,
-        20,
-        0,
-        9.5,
-        0,
-        0,
-        1,
-        0
-      ],
-      "shape": "arealight",
-      "material": "arealight"
     }
   },
   "materials": {
-    "sphere": {
+    "diffuse": {
       "color": [
         0.8,
         0.4,
