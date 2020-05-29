@@ -424,7 +424,6 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
   brdf.beta_n = material->beta_n;
   brdf.alpha  = material->alpha;
   brdf.eta    = material->eta;
-  brdf.sigma_a = zero3f;
 
 #ifdef YOCTO_EMBREE
   brdf.h = v;
