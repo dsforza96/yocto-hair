@@ -424,6 +424,7 @@ static hair_brdf eval_hair_brdf(const ptr::material* material, float v,
   brdf.beta_n = material->beta_n;
   brdf.alpha  = material->alpha;
   brdf.eta    = material->eta;
+  brdf.sigma_a = zero3f;
 
 #ifdef YOCTO_EMBREE
   brdf.h = v;
@@ -1429,7 +1430,7 @@ vec3f UniformSampleSphere(const vec2f &u) {
 
 void white_furnace_test(rng_state rng) {
     
-    vec3f wo = math::sample_sphere(math::rand2f(rng));
+    vec3f wo = UniformSampleSphere(math::rand2f(rng));
     for (float beta_m = .1; beta_m < 1; beta_m += .2) {
         for (float beta_n = .1; beta_n < 1; beta_n += .2) {
             // Estimate reflected uniform incident radiance from hair
@@ -1553,8 +1554,8 @@ static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
   auto volume_stack = std::vector<vsdf>{};
   auto hit          = false;
 
-  // white_furnace_sampled_test(rng);
   // white_furnace_test(rng);
+  //white_furnace_sampled_test(rng);
   // white_furnace_weights_test(rng);
   // trace  path
   for (auto bounce = 0; bounce < params.bounces; bounce++) {
