@@ -1443,6 +1443,8 @@ void white_furnace_test(rng_state rng) {
             if( avg >= .95 && avg <= 1.05) {
               printf("We are in .95 and 1.05");
               fflush(stdout);
+            } else {
+              throw "error";
             }
         }
     }
@@ -1479,6 +1481,8 @@ void white_furnace_sampled_test(rng_state rng) {
             if( avg >= .99 && avg <= 1.01) {
               printf("We are in .95 and 1.05\n");
               fflush(stdout);
+            } else {
+              throw "error";
             }
         }
     }
@@ -1512,7 +1516,9 @@ void white_furnace_weights_test(rng_state rng) {
                   if( math::luminance(f) * abs(wi.z)/pdf >= .999 && math::luminance(f) * abs(wi.z)/pdf <= 1.001) {
                     printf("We are in .99 and 1.001\n");
                     fflush(stdout);
-                  }
+                  } else {
+                    throw "error";
+                  }  
                   
                 }
 
@@ -1534,6 +1540,9 @@ static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
   auto volume_stack = std::vector<vsdf>{};
   auto hit          = false;
 
+  // white_furnace_sampled_test(rng);
+  // white_furnace_test(rng);
+  // white_furnace_weights_test(rng);
   // trace  path
   for (auto bounce = 0; bounce < params.bounces; bounce++) {
     // intersect next point
