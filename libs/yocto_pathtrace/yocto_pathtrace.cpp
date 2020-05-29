@@ -1111,8 +1111,7 @@ static vec3f eval_emission(
 static vec3f eval_brdfcos(const ptr::brdf& brdf, const vec3f& normal,
     const vec3f& outgoing, const vec3f& incoming) {
   if (brdf.hair) {
-    return eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming) *
-           abs(dot(normal, incoming));
+    return eval_hair_scattering(brdf.hair_brdf, normal, outgoing, incoming) * abs(dot(incoming, normal));
   }
 
   if (!brdf.roughness) return zero3f;
@@ -1419,6 +1418,74 @@ static float sample_scattering_pdf(
   return sample_phasefunction_pdf(vsdf.anisotropy, outgoing, incoming);
 }
 
+void white_furnace_test(rng_state rng) {
+    
+    vec3f wo = math::sample_sphere(math::rand2f(rng));
+    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+            // Estimate reflected uniform incident radiance from hair
+            vec3f sum = zero3f;
+            int count = 300000;
+            for (int i = 0; i < count; ++i) {
+                float h = -1 + 2. * math::rand1f(rng);
+                vec3f sigma_a = zero3f;
+                ptr::material mat = {};
+                mat.sigma_a = sigma_a;
+                mat.beta_m = beta_m;
+                mat.beta_n = beta_n;
+                
+                hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
+               
+                vec3f wi = math::sample_sphere(math::rand2f(rng));
+                sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
+            }
+            float avg = math::luminance(sum) / (count * math::sample_sphere_pdf(zero3f));
+            if( avg >= .95 && avg <= 1.05) {
+              printf("We are in .95 and 1.05");
+              fflush(stdout);
+            }
+        }
+    }
+    printf("non trovato nulla \n");
+    fflush(stdout);
+}
+
+// this not work
+void white_furnace_sampled_test(rng_state rng) {
+    
+    vec3f wo = math::sample_sphere(math::rand2f(rng));
+    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+            // Estimate reflected uniform incident radiance from hair
+            vec3f sum = zero3f;
+            int count = 300000;
+            for (int i = 0; i < count; ++i) {
+                float h = -1 + 2. * math::rand1f(rng);
+                vec3f sigma_a = zero3f;
+                ptr::material mat = {};
+                mat.sigma_a = sigma_a;
+                mat.beta_m = beta_m;
+                mat.beta_n = beta_n;
+                
+                hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
+               
+                vec3f wi = sample_hair_scattering(brdf, zero3f, wo, math::rand2f(rng));
+                auto pdf = sample_hair_scattering_pdf(brdf,wo, wi);
+                auto f = eval_hair_scattering(brdf,zero3f, wo,wi);
+                // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
+                if (pdf > 0 ) sum += f * abs(wi.z) / pdf; 
+            }
+            float avg = math::luminance(sum) / (count);
+            if( avg >= .99 && avg <= 1.01) {
+              printf("We are in .95 and 1.05");
+              fflush(stdout);
+            }
+        }
+    }
+    printf("non trovato nulla \n");
+    fflush(stdout);
+}
+
 // Path tracing.
 static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
     rng_state& rng, const trace_params& params) {
@@ -1429,6 +1496,7 @@ static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
   auto volume_stack = std::vector<vsdf>{};
   auto hit          = false;
 
+  white_furnace_sampled_test(rng);
   // trace  path
   for (auto bounce = 0; bounce < params.bounces; bounce++) {
     // intersect next point
@@ -2299,5 +2367,35 @@ void set_emission(ptr::environment* environment, const vec3f& emission,
   environment->emission     = emission;
   environment->emission_tex = emission_tex;
 }
+
+/*
+void white_furnace_sampled_test(rng_state rng) {
+    
+    vec3f wo = math::sample_sphere(math::rand2f(rng));
+    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+            // Estimate reflected uniform incident radiance from hair
+            vec3f sum = zero3f;
+            int count = 300000;
+            for (int i = 0; i < count; ++i) {
+                float h = -1 + 2. * math::rand1f(rng);
+                vec3f sigma_a = zero3f;
+                material mat = {};
+                mat.sigma_a = sigma_a;
+                auto brdf = eval_hair_brdf(mat, h, zero3f, zero3f);
+
+                auto  sample_hair_scattering(brdf, zero3f, wo, math::rand2f(rng));
+            }
+            float avg = math::luminance(sum) / (count * math::sample_sphere_pdf(zero3f));
+            if( avg >= .95 && avg <= 1.05) {
+              printf("We are in .95 and 1.05");
+              fflush(stdout);
+            }
+        }
+    }
+    printf("non trovato nulla \n");
+    fflush(stdout);
+}
+*/
 
 }  // namespace yocto::pathtrace

@@ -152,6 +152,7 @@ static vec3f sigma_a_from_reflectance(const vec3f& c, float beta_n) {
                         0.245f * pow<5>(beta_n)));
   return sigma_a;
 }
+void white_furnace_test(rng_state rng);
 
 }  // namespace yocto::extension
 

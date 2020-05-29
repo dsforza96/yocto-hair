@@ -554,4 +554,7 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   */
 }
 
+
+
+
 }  // namespace yocto::extension
