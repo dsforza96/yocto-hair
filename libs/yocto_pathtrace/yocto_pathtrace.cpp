@@ -1450,7 +1450,7 @@ void white_furnace_test(rng_state rng) {
     fflush(stdout);
 }
 
-// this not work
+// this pass
 void white_furnace_sampled_test(rng_state rng) {
     
     vec3f wo = math::sample_sphere(math::rand2f(rng));
@@ -1473,13 +1473,51 @@ void white_furnace_sampled_test(rng_state rng) {
                 auto pdf = sample_hair_scattering_pdf(brdf,wo, wi);
                 auto f = eval_hair_scattering(brdf,zero3f, wo,wi);
                 // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
-                if (pdf > 0 ) sum += f * abs(wi.z) / pdf; 
+                if (pdf > 0) sum += f * abs(wi.z) / pdf; 
             }
             float avg = math::luminance(sum) / (count);
             if( avg >= .99 && avg <= 1.01) {
-              printf("We are in .95 and 1.05");
+              printf("We are in .95 and 1.05\n");
               fflush(stdout);
             }
+        }
+    }
+    printf("non trovato nulla \n");
+    fflush(stdout);
+}
+
+// this not work
+void white_furnace_weights_test(rng_state rng) {
+  
+    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
+        for (float beta_n = .4; beta_n < 1; beta_n += .2) {
+            // Estimate reflected uniform incident radiance from hair
+            int count = 10000;
+            for (int i = 0; i < count; ++i) {
+                float h = -1 + 2. * math::rand1f(rng);
+                vec3f sigma_a = zero3f;
+                ptr::material mat = {};
+                mat.sigma_a = sigma_a;
+                mat.beta_m = beta_m;
+                mat.beta_n = beta_n;
+                
+                hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
+                vec3f wo = math::sample_sphere(math::rand2f(rng));
+               
+                vec3f wi = sample_hair_scattering(brdf, zero3f, wo, math::rand2f(rng));
+                auto pdf = sample_hair_scattering_pdf(brdf,wo, wi);
+                auto f = eval_hair_scattering(brdf,zero3f, wo,wi);
+                // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
+                if (pdf > 0) {
+                  if( math::luminance(f) * abs(wi.z)/pdf >= .999 && math::luminance(f) * abs(wi.z)/pdf <= 1.001) {
+                    printf("We are in .99 and 1.001\n");
+                    fflush(stdout);
+                  }
+                  
+                }
+
+            }
+            
         }
     }
     printf("non trovato nulla \n");
