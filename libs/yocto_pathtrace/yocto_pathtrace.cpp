@@ -1568,7 +1568,7 @@ void sampling_consistency_test(rng_state rng) {
                 brdf.sigma_a = zero3f;
                 float pdf;
                 vec2f u = math::rand2f(rng);
-                vec3f wi = sample_hair_scattering(brdf, zero3f, wo, u, &pdf);
+                vec3f wi = sample_hair_scattering(brdf, zero3f, wo, u);
                 pdf = sample_hair_scattering_pdf(brdf,wo, wi);
                 auto f = eval_hair_scattering(brdf,zero3f, wo,wi);
                 if (pdf > 0)
