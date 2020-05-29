@@ -1543,6 +1543,55 @@ void white_furnace_weights_test(rng_state rng) {
     fflush(stdout);
 }
 
+void sampling_consistency_test(rng_state rng) {
+    for (float beta_m = .2; beta_m < 1; beta_m += .2)
+        for (float beta_n = .4; beta_n < 1; beta_n += .2) {
+            // Declare variables for hair sampling test
+            const int count = 64 * 1024;
+            vec3f sigma_a = vec3f(.25);
+            vec3f wo =
+                UniformSampleSphere(math::rand2f(rng));
+            auto Li = [](const vec3f &w) -> vec3f { return vec3f(w.z * w.z); };
+            vec3f fImportance = vec3f(0), fUniform = vec3f(0);
+            for (int i = 0; i < count; ++i) {
+                // Compute estimates of scattered radiance for hair sampling
+                // test
+                float h = clamp(-1 + 2. * math::rand1f(rng) + math::flt_eps, -1.0f, 1.0f);
+                vec3f sigma_a = zero3f;
+                ptr::material mat = {};
+                mat.sigma_a = sigma_a;
+                mat.beta_m = beta_m;
+                mat.beta_n = beta_n;
+                mat.alpha = 0.0f;
+                
+                hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
+                brdf.sigma_a = zero3f;
+                float pdf;
+                vec2f u = math::rand2f(rng);
+                vec3f wi = sample_hair_scattering(brdf, zero3f, wo, u, &pdf);
+                pdf = sample_hair_scattering_pdf(brdf,wo, wi);
+                auto f = eval_hair_scattering(brdf,zero3f, wo,wi);
+                if (pdf > 0)
+                    fImportance += f * Li(wi) * abs(wi.z) / (count * pdf);
+                wi = UniformSampleSphere(u);
+                fUniform += eval_hair_scattering(brdf, zero3f, wo, wi) * Li(wi) * abs(wi.z) /
+                            (count * math::sample_sphere_pdf(zero3f));
+            }
+            // Verify consistency of estimated hair reflected radiance values
+            float err = std::abs(math::luminance(fImportance) - math::luminance(fUniform)) / math::luminance(fUniform);
+            // EXPECT_LT(err, 0.05);
+            if( err < 0.05) {
+                   
+            } else {
+              printf("err: %f", err);
+              fflush(stdout);
+              throw "error";
+            }  
+        }
+    printf("non trovato nulla \n");
+    fflush(stdout);
+}
+
 // Path tracing.
 static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
     rng_state& rng, const trace_params& params) {
