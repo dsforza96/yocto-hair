@@ -244,7 +244,7 @@ vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
   float sin_gamma_t = h / etap;
   float cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
-  float gamma_t     = safe_asin(cos_gamma_t);
+  float gamma_t     = safe_asin(sin_gamma_t);
 
   // Compute the transmittance _T_ of a single path through the cylinder
   vec3f T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));

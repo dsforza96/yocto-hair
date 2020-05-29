@@ -1418,6 +1418,15 @@ static float sample_scattering_pdf(
   return sample_phasefunction_pdf(vsdf.anisotropy, outgoing, incoming);
 }
 
+
+vec3f UniformSampleSphere(const vec2f &u) {
+    float z = 1 - 2 * u[0];
+    float r = std::sqrt(std::max(0.0f, 1.0f - z * z));
+    float phi = 2 * pif * u[1];
+    return vec3f{r * std::cos(phi), r * std::sin(phi), z};
+}
+
+
 void white_furnace_test(rng_state rng) {
     
     vec3f wo = math::sample_sphere(math::rand2f(rng));
@@ -1433,16 +1442,18 @@ void white_furnace_test(rng_state rng) {
                 mat.sigma_a = sigma_a;
                 mat.beta_m = beta_m;
                 mat.beta_n = beta_n;
+                mat.alpha = 0.0;
                 
                 hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
-               
-                vec3f wi = math::sample_sphere(math::rand2f(rng));
+                brdf.sigma_a = zero3f;
+                
+                vec3f wi = UniformSampleSphere(math::rand2f(rng));
+
                 sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
             }
             float avg = math::luminance(sum) / (count * math::sample_sphere_pdf(zero3f));
             if( avg >= .95 && avg <= 1.05) {
-              printf("We are in .95 and 1.05");
-              fflush(stdout);
+
             } else {
               throw "error";
             }
@@ -1455,7 +1466,7 @@ void white_furnace_test(rng_state rng) {
 // this pass
 void white_furnace_sampled_test(rng_state rng) {
     
-    vec3f wo = math::sample_sphere(math::rand2f(rng));
+    vec3f wo = UniformSampleSphere(math::rand2f(rng));
     for (float beta_m = .1; beta_m < 1; beta_m += .2) {
         for (float beta_n = .1; beta_n < 1; beta_n += .2) {
             // Estimate reflected uniform incident radiance from hair
@@ -1468,8 +1479,10 @@ void white_furnace_sampled_test(rng_state rng) {
                 mat.sigma_a = sigma_a;
                 mat.beta_m = beta_m;
                 mat.beta_n = beta_n;
+                mat.alpha = 0.0;
                 
                 hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
+                brdf.sigma_a = zero3f;
                
                 vec3f wi = sample_hair_scattering(brdf, zero3f, wo, math::rand2f(rng));
                 auto pdf = sample_hair_scattering_pdf(brdf,wo, wi);
@@ -1479,8 +1492,7 @@ void white_furnace_sampled_test(rng_state rng) {
             }
             float avg = math::luminance(sum) / (count);
             if( avg >= .99 && avg <= 1.01) {
-              printf("We are in .95 and 1.05\n");
-              fflush(stdout);
+
             } else {
               throw "error";
             }
@@ -1504,18 +1516,19 @@ void white_furnace_weights_test(rng_state rng) {
                 mat.sigma_a = sigma_a;
                 mat.beta_m = beta_m;
                 mat.beta_n = beta_n;
+                mat.alpha = 0.0f;
                 
                 hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
-                vec3f wo = math::sample_sphere(math::rand2f(rng));
-               
+                brdf.sigma_a = zero3f;
+                vec3f wo = UniformSampleSphere(math::rand2f(rng));
+
                 vec3f wi = sample_hair_scattering(brdf, zero3f, wo, math::rand2f(rng));
                 auto pdf = sample_hair_scattering_pdf(brdf,wo, wi);
                 auto f = eval_hair_scattering(brdf,zero3f, wo,wi);
                 // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
                 if (pdf > 0) {
                   if( math::luminance(f) * abs(wi.z)/pdf >= .999 && math::luminance(f) * abs(wi.z)/pdf <= 1.001) {
-                    printf("We are in .99 and 1.001\n");
-                    fflush(stdout);
+
                   } else {
                     throw "error";
                   }  
