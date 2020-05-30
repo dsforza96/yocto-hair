@@ -33,6 +33,8 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
+
 using namespace std::string_literals;
 
 // -----------------------------------------------------------------------------
@@ -589,9 +591,7 @@ void white_furnace_test() {
                   (count * math::sample_sphere_pdf(zero3f));
       if (avg >= .94 && avg <= 1.06) {
       } else {
-        printf("%f\n", avg);
-        fflush(stdout);
-        throw "FAILED!";
+        throw std::runtime_error("TEST FAILED!");
       }
     }
   }
@@ -633,7 +633,7 @@ void white_furnace_sampled_test() {
       float avg = math::luminance(sum) / (count);
       if (avg >= .99 && avg <= 1.01) {
       } else {
-        throw "FAILED!";
+        throw std::runtime_error("TEST FAILED!");
       }
     }
   }
@@ -674,7 +674,7 @@ void sampling_weights_test() {
           if (math::luminance(f) / pdf >= .999 &&
               math::luminance(f) * abs(wi.z) / pdf <= 1.001) {
           } else {
-            throw "FAILED!";
+            throw std::runtime_error("TEST FAILED!");
           }
         }
       }
@@ -729,7 +729,7 @@ void sampling_consistency_test() {
       } else {
         printf("Err: %f\n", err);
         fflush(stdout);
-        throw "FAILED!";
+        throw std::runtime_error("TEST FAILED!");
       }
     }
   printf("OK!\n");
