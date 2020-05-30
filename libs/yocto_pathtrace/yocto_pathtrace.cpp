@@ -1381,7 +1381,7 @@ static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
   auto volume_stack = std::vector<vsdf>{};
   auto hit          = false;
 
-  extension::white_furnace_test();
+  // extension::white_furnace_test();
   // extension::white_furnace_sampled_test();
   // extension::sampling_weights_test();
   // extension::sampling_consistency_test();
