@@ -84,18 +84,29 @@ namespace yocto::extension {
 static const int   p_max           = 3;
 static const float sqrt_pi_over_8f = 0.626657069f;
 
+struct hair_material {
+  vec3f sigma_a     = zero3f;
+  float beta_m      = 0.3;
+  float beta_n      = 0.3;
+  float alpha       = 2;
+  float eta         = 1.55;
+  vec3f color       = zero3f;
+  float eumelanin   = 0;
+  float pheomelanin = 0;
+};
+
 struct hair_brdf {
   vec3f sigma_a = zero3f;
   float alpha   = 2;
   float eta     = 1.55;
+  float h       = 0;
 
-  // Computed properties
-  float                        h       = 0;
-  float                        gamma_o = 0;
+  // computed properties
   std::array<float, p_max + 1> v;
   float                        s = 0;
-  std::array<float, 3>         sin_2k_alpha;
-  std::array<float, 3>         cos_2k_alpha;
+  vec3f                        sin_2k_alpha;
+  vec3f                        cos_2k_alpha;
+  float                        gamma_o = 0;
 
   frame3f frame = {};
 };
@@ -122,7 +133,8 @@ inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
 
 inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
 
-// hair_brdf eval_hair_brdf(const pathtrace::material* material, float, h);
+hair_brdf eval_hair_brdf(const hair_material& material, float v,
+    const vec3f& normal, const vec3f& tangent);
 
 vec3f eval_hair_scattering(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
