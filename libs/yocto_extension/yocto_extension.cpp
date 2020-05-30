@@ -548,16 +548,9 @@ vec3f sample_hair_scattering(
 
 // HAIR SCATTERING TESTS
 
-vec3f uniform_sample_sphere(const vec2f& u) {
-  float z   = 1 - 2 * u[0];
-  float r   = sqrt(max(0.0f, 1.0f - z * z));
-  float phi = 2 * pif * u[1];
-  return vec3f{r * cos(phi), r * sin(phi), z};
-}
-
 void white_furnace_test() {
   rng_state rng = math::make_rng(199382389514);
-  vec3f     wo  = uniform_sample_sphere(math::rand2f(rng));
+  vec3f     wo  = math::sample_sphere(math::rand2f(rng));
   for (float beta_m = .1; beta_m < 1; beta_m += .2) {
     for (float beta_n = .1; beta_n < 1; beta_n += .2) {
       // Estimate reflected uniform incident radiance from hair
@@ -583,13 +576,13 @@ void white_furnace_test() {
         brdf.world_to_brdf = math::identity3x4f;
         brdf.sigma_a       = zero3f;
 
-        vec3f wi = uniform_sample_sphere(math::rand2f(rng));
+        vec3f wi = math::sample_sphere(math::rand2f(rng));
 
         sum += eval_hair_scattering(brdf, wo, wi);
       }
       float avg = math::luminance(sum) /
                   (count * math::sample_sphere_pdf(zero3f));
-      if (avg >= .94 && avg <= 1.06) {
+      if (avg >= .95 && avg <= 1.05) {
       } else {
         throw std::runtime_error("TEST FAILED!");
       }
@@ -601,7 +594,7 @@ void white_furnace_test() {
 
 void white_furnace_sampled_test() {
   rng_state rng = math::make_rng(199382389514);
-  vec3f     wo  = uniform_sample_sphere(math::rand2f(rng));
+  vec3f     wo  = math::sample_sphere(math::rand2f(rng));
   for (float beta_m = .1; beta_m < 1; beta_m += .2) {
     for (float beta_n = .1; beta_n < 1; beta_n += .2) {
       // Estimate reflected uniform incident radiance from hair
@@ -664,7 +657,7 @@ void sampling_weights_test() {
         hair_brdf brdf     = eval_hair_brdf(mat, h, zero3f, zero3f);
         brdf.world_to_brdf = math::identity3x4f;
         brdf.sigma_a       = zero3f;
-        vec3f wo           = uniform_sample_sphere(math::rand2f(rng));
+        vec3f wo           = math::sample_sphere(math::rand2f(rng));
 
         vec3f wi  = sample_hair_scattering(brdf, wo, math::rand2f(rng));
         auto  pdf = sample_hair_scattering_pdf(brdf, wo, wi);
@@ -691,7 +684,7 @@ void sampling_consistency_test() {
       // Declare variables for hair sampling test
       const int count   = 64 * 1024;
       vec3f     sigma_a = vec3f(.25);
-      vec3f     wo      = uniform_sample_sphere(math::rand2f(rng));
+      vec3f     wo      = math::sample_sphere(math::rand2f(rng));
       auto      Li = [](const vec3f& w) -> vec3f { return vec3f(w.z * w.z); };
       vec3f     fImportance = vec3f(0), fUniform = vec3f(0);
       for (int i = 0; i < count; ++i) {
@@ -716,7 +709,7 @@ void sampling_consistency_test() {
         pdf      = sample_hair_scattering_pdf(brdf, wo, wi);
         auto f   = eval_hair_scattering(brdf, wo, wi);
         if (pdf > 0) fImportance += f * Li(wi) / (count * pdf);
-        wi = uniform_sample_sphere(u);
+        wi = math::sample_sphere(u);
         fUniform += eval_hair_scattering(brdf, wo, wi) * Li(wi) /
                     (count * math::sample_sphere_pdf(zero3f));
       }
