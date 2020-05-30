@@ -90,15 +90,8 @@ using yocto::extension::eval_hair_scattering;
 using yocto::extension::hair_brdf;
 using yocto::extension::hair_material;
 using yocto::extension::p_max;
-using yocto::extension::pow;
-using yocto::extension::safe_asin;
-using yocto::extension::safe_sqrt;
 using yocto::extension::sample_hair_scattering;
 using yocto::extension::sample_hair_scattering_pdf;
-using yocto::extension::sigma_a_from_concentration;
-using yocto::extension::sigma_a_from_reflectance;
-using yocto::extension::sqr;
-using yocto::extension::sqrt_pi_over_8f;
 
 }  // namespace yocto::pathtrace
 
@@ -480,16 +473,16 @@ static brdf eval_brdf(const ptr::object* object, int element, const vec2f& uv,
 
   // hair brdf
   brdf.hair = !object->shape->lines.empty();
+  if (brdf.hair) {
+    auto hair_material = extension::hair_material{material->sigma_a,
+        material->beta_m, material->beta_n, material->alpha, material->eta,
+        material->color, material->eumelanin, material->pheomelanin};
 
-  auto hair_material = extension::hair_material{material->sigma_a,
-      material->beta_m, material->beta_n, material->alpha, material->eta,
-      material->color, material->eumelanin, material->pheomelanin};
+    auto v       = uv.y;
+    auto tangent = eval_normal(object, element, uv);
 
-  auto v       = uv.y;
-  auto tangent = eval_normal(object, element, uv);
-
-  brdf.hair_brdf = eval_hair_brdf(hair_material, v, normal, tangent);
-
+    brdf.hair_brdf = eval_hair_brdf(hair_material, v, normal, tangent);
+  }
   return brdf;
 }
 

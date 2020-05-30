@@ -78,26 +78,30 @@ using math::zero4i;
 // IMPLEMENTATION FOR EXTENSION
 // -----------------------------------------------------------------------------
 namespace yocto::extension {
-/*
-inline float fresnel_dielectric(float eta, float cosw) {
-  // Implementation from
-  // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-  auto sin2 = 1 - cosw * cosw;
-  auto eta2 = eta * eta;
 
-  auto cos2t = 1 - sin2 / eta2;
-  if (cos2t < 0) return 1;  // tir
+static const float sqrt_pi_over_8f = 0.626657069f;
 
-  auto t0 = sqrt(cos2t);
-  auto t1 = eta * t0;
-  auto t2 = eta * cosw;
+inline float sqr(float v) { return v * v; }
 
-  auto rs = (cosw - t1) / (cosw + t1);
-  auto rp = (t0 - t2) / (t0 + t2);
-
-  return (rs * rs + rp * rp) / 2;
+template <int n>
+static float pow(float v) {
+  float n2 = pow<n / 2>(v);
+  return n2 * n2 * pow<n & 1>(v);
 }
-*/
+
+template <>
+inline float pow<1>(float v) {
+  return v;
+}
+
+template <>
+inline float pow<0>(float v) {
+  return 1;
+}
+
+inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
+
+inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
 
 inline float i0(float x) {
   float   val   = 0;
@@ -112,6 +116,24 @@ inline float i0(float x) {
     i4 *= 4;
   }
   return val;
+}
+
+static vec3f sigma_a_from_concentration(float ce, float cp) {
+  vec3f sigma_a;
+  vec3f eumelanin_sigma_a   = {0.419f, 0.697f, 1.37f};
+  vec3f pheomelanin_sigma_a = {0.187f, 0.4f, 1.05f};
+  sigma_a = (ce * eumelanin_sigma_a + cp * pheomelanin_sigma_a);
+  return sigma_a;
+}
+
+static vec3f sigma_a_from_reflectance(const vec3f& c, float beta_n) {
+  vec3f sigma_a;
+  for (int i = 0; i < 3; ++i)
+    sigma_a[i] = sqr(
+        log(c[i]) / (5.969f - 0.215f * beta_n + 2.532f * sqr(beta_n) -
+                        10.73f * pow<3>(beta_n) + 5.574f * pow<4>(beta_n) +
+                        0.245f * pow<5>(beta_n)));
+  return sigma_a;
 }
 
 hair_brdf eval_hair_brdf(const hair_material& material, float v,
@@ -201,11 +223,11 @@ static std::array<vec3f, p_max + 1> ap(
   // Compute $p=0$ attenuation at initial cylinder intersection
   float cos_gamma_o = safe_sqrt(1 - h * h);
   float cos_theta   = cos_theta_o * cos_gamma_o;
+
   // fresnel_dielectric(eta, cos_theta): we hack function's parameters bulding
   // two vector s.T. their dot product give exactly cos_theta
-  float f = fresnel_dielectric(
-      eta, {1, 1, 1}, {cos_theta, 0, 0});  // TODO: Ci manca un eta
-  ap[0] = vec3f(f);
+  float f = fresnel_dielectric(eta, {1, 0, 0}, {cos_theta, 0, 0});
+  ap[0]   = vec3f(f);
 
   // Compute $p=1$ attenuation term
   ap[1] = sqr(1 - f) * T;
@@ -228,9 +250,7 @@ inline float np(float phi, int p, float s, float gamma_o, float gamma_t) {
 
 vec3f eval_hair_scattering(
     const hair_brdf& brdf, const vec3f& outgoing_, const vec3f& incoming_) {
-  auto sigma_a = brdf.sigma_a;
-  // auto beta_m       = brdf.beta_n;
-  // auto beta_n       = brdf.beta_m;
+  auto sigma_a      = brdf.sigma_a;
   auto eta          = brdf.eta;
   auto h            = brdf.h;
   auto gamma_o      = brdf.gamma_o;
@@ -305,9 +325,11 @@ vec3f eval_hair_scattering(
   fsum += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
           ap[p_max] / (2.0f * pif);
 
-  if (abs(incoming.z) > 0)
-    fsum /= abs(incoming.z);  // TODO: DA SISTEMARE AbsCosTheta
-  return fsum * abs(incoming.z);
+  // if (abs(incoming.z) > 0)
+  //   fsum /= abs(incoming.z);
+  // return fsum * abs(incoming.z);
+
+  return fsum;
 }
 
 static std::array<float, p_max + 1> compute_ap_pdf(
@@ -346,9 +368,6 @@ static std::array<float, p_max + 1> compute_ap_pdf(
 
 float sample_hair_scattering_pdf(
     const hair_brdf& brdf, const vec3f& outgoing_, const vec3f& incoming_) {
-  // auto sigma_a      = brdf.sigma_a;
-  // auto beta_m       = brdf.beta_n;
-  // auto beta_n       = brdf.beta_m;
   auto eta          = brdf.eta;
   auto h            = brdf.h;
   auto gamma_o      = brdf.gamma_o;
@@ -446,9 +465,6 @@ static float sample_trimmed_logistic(float u, float s, float a, float b) {
 
 vec3f sample_hair_scattering(
     const hair_brdf& brdf, const vec3f& outgoing_, const vec2f& u2) {
-  // auto sigma_a      = brdf.sigma_a;
-  // auto beta_m       = brdf.beta_n;
-  // auto beta_n       = brdf.beta_m;
   auto eta          = brdf.eta;
   auto h            = brdf.h;
   auto gamma_o      = brdf.gamma_o;
@@ -526,48 +542,6 @@ vec3f sample_hair_scattering(
   auto incoming = vec3f{
       sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
   return transform_direction(inverse(frame), incoming);
-  /*
-  *incoming   = vec3f{
-      sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
-
-  // Compute PDF for sampled hair scattering direction _wi_
-  *pdf = 0;
-  for (int p = 0; p < p_max; ++p) {
-    // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
-    float sin_theta_op, cos_theta_op;
-    if (p == 0) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[1] -
-                     cos_theta_o * sin_2k_alpha[1];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[1] +
-                     sin_theta_o * sin_2k_alpha[1];
-    }
-
-    // Handle remainder of $p$ values for hair scale tilt
-    else if (p == 1) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[0] +
-                     cos_theta_o * sin_2k_alpha[0];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[0] -
-                     sin_theta_o * sin_2k_alpha[0];
-    } else if (p == 2) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[2] +
-                     cos_theta_o * sin_2k_alpha[2];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[2] -
-                     sin_theta_o * sin_2k_alpha[2];
-    } else {
-      sin_theta_op = sin_theta_o;
-      cos_theta_op = cos_theta_o;
-    }
-
-    // Handle out-of-range $\cos \thetao$ from scale adjustment
-    cos_theta_op = abs(cos_theta_op);
-    *pdf += mp(cos_theta_i, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) *
-            ap_pdf[p] * np(dphi, p, s, gamma_o, gamma_t);
-  }
-  *pdf += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
-          ap_pdf[p_max] * (1 / (2 * pif));
-  // if (std::abs(wi->x) < .9999) CHECK_NEAR(*pdf, Pdf(wo, *wi), .01);
-  return eval_hair_scattering(brdf, normal, outgoing, *incoming);
-  */
 }
 
 vec3f UniformSampleSphere(const vec2f& u) {
