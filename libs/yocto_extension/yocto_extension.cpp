@@ -291,7 +291,7 @@ vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
 
   if (abs(incoming.z) > 0)
     fsum /= abs(incoming.z);  // TODO: DA SISTEMARE AbsCosTheta
-  return fsum;
+  return fsum * abs(incoming.z);
 }
 
 static std::array<float, p_max + 1> compute_ap_pdf(
