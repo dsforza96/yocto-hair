@@ -1557,7 +1557,6 @@ void sampling_consistency_test(rng_state rng) {
                 // Compute estimates of scattered radiance for hair sampling
                 // test
                 float h = clamp(-1 + 2. * math::rand1f(rng) + math::flt_eps, -1.0f, 1.0f);
-                vec3f sigma_a = zero3f;
                 ptr::material mat = {};
                 mat.sigma_a = sigma_a;
                 mat.beta_m = beta_m;
@@ -1565,7 +1564,6 @@ void sampling_consistency_test(rng_state rng) {
                 mat.alpha = 0.0f;
                 
                 hair_brdf brdf = eval_hair_brdf(&mat, h, zero3f, zero3f);
-                brdf.sigma_a = zero3f;
                 float pdf;
                 vec2f u = math::rand2f(rng);
                 vec3f wi = sample_hair_scattering(brdf, zero3f, wo, u);
