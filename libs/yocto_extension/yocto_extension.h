@@ -86,12 +86,10 @@ static const float sqrt_pi_over_8f = 0.626657069f;
 
 struct hair_brdf {
   vec3f sigma_a = zero3f;
-  float beta_m  = 0.3;
-  float beta_n  = 0.3;
   float alpha   = 2;
   float eta     = 1.55;
 
-  // Private data
+  // Computed properties
   float                        h       = 0;
   float                        gamma_o = 0;
   std::array<float, p_max + 1> v;
@@ -126,11 +124,11 @@ inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
 
 // hair_brdf eval_hair_brdf(const pathtrace::material* material, float, h);
 
-vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
-    const vec3f& outgoing, const vec3f& incoming);
+vec3f eval_hair_scattering(
+    const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
 
-vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
-    const vec3f& outgoing, const vec2f& u2);
+vec3f sample_hair_scattering(
+    const hair_brdf& brdf, const vec3f& outgoing, const vec2f& u2);
 
 float sample_hair_scattering_pdf(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
@@ -139,7 +137,7 @@ static vec3f sigma_a_from_concentration(float ce, float cp) {
   vec3f sigma_a;
   vec3f eumelanin_sigma_a   = {0.419f, 0.697f, 1.37f};
   vec3f pheomelanin_sigma_a = {0.187f, 0.4f, 1.05f};
-  sigma_a = (ce * eumelanin_sigma_a + cp * pheomelanin_sigma_a) ;
+  sigma_a = (ce * eumelanin_sigma_a + cp * pheomelanin_sigma_a);
   return sigma_a;
 }
 

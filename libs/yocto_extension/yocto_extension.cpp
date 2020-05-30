@@ -210,8 +210,8 @@ inline float np(float phi, int p, float s, float gamma_o, float gamma_t) {
   return trimmed_logistic(dphi, s, -pif, pif);
 }
 
-vec3f eval_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
-    const vec3f& outgoing_, const vec3f& incoming_) {
+vec3f eval_hair_scattering(
+    const hair_brdf& brdf, const vec3f& outgoing_, const vec3f& incoming_) {
   auto sigma_a = brdf.sigma_a;
   // auto beta_m       = brdf.beta_n;
   // auto beta_n       = brdf.beta_m;
@@ -428,8 +428,8 @@ static float sample_trimmed_logistic(float u, float s, float a, float b) {
   return clamp(x, a, b);
 }
 
-vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
-    const vec3f& outgoing_, const vec2f& u2) {
+vec3f sample_hair_scattering(
+    const hair_brdf& brdf, const vec3f& outgoing_, const vec2f& u2) {
   // auto sigma_a      = brdf.sigma_a;
   // auto beta_m       = brdf.beta_n;
   // auto beta_n       = brdf.beta_m;
@@ -553,8 +553,5 @@ vec3f sample_hair_scattering(const hair_brdf& brdf, const vec3f& normal,
   return eval_hair_scattering(brdf, normal, outgoing, *incoming);
   */
 }
-
-
-
 
 }  // namespace yocto::extension
