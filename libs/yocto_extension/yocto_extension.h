@@ -107,7 +107,9 @@ struct hair_brdf {
   vec3f                        cos_2k_alpha;
   float                        gamma_o = 0;
 
-  frame3f frame = {};
+  // Allow to convert outgoing and incoming directions to BRDF coordinate
+  // system
+  frame3f world_to_brdf = math::identity3x4f;
 };
 
 hair_brdf eval_hair_brdf(const hair_material& material, float v,
@@ -122,7 +124,10 @@ vec3f sample_hair_scattering(
 float sample_hair_scattering_pdf(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
 
-void white_furnace_test(rng_state rng);
+void white_furnace_test();
+void sampling_weights_test();
+void white_furnace_sampled_test();
+void sampling_consistency_test();
 
 }  // namespace yocto::extension
 

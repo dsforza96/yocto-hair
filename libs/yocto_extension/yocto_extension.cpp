@@ -180,7 +180,7 @@ hair_brdf eval_hair_brdf(const hair_material& material, float v,
                            sqr(brdf.sin_2k_alpha[i - 1]);
   }
 
-  brdf.frame = inverse(frame_fromzx(zero3f, normal, tangent));
+  brdf.world_to_brdf = inverse(frame_fromzx(zero3f, normal, tangent));
 
   return brdf;
 }
@@ -258,10 +258,10 @@ vec3f eval_hair_scattering(
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
-  auto frame        = brdf.frame;
+  auto world_to_brdf        = brdf.world_to_brdf;
 
-  auto outgoing = transform_direction(frame, outgoing_);
-  auto incoming = transform_direction(frame, incoming_);
+  auto outgoing = transform_direction(world_to_brdf, outgoing_);
+  auto incoming = transform_direction(world_to_brdf, incoming_);
 
   // Compute hair coordinate system terms related to _wo_
   float sin_theta_o = outgoing.x;
@@ -375,10 +375,10 @@ float sample_hair_scattering_pdf(
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
-  auto frame        = brdf.frame;
+  auto world_to_brdf        = brdf.world_to_brdf;
 
-  auto outgoing = transform_direction(frame, outgoing_);
-  auto incoming = transform_direction(frame, incoming_);
+  auto outgoing = transform_direction(world_to_brdf, outgoing_);
+  auto incoming = transform_direction(world_to_brdf, incoming_);
 
   // Compute hair coordinate system terms related to _wo_
   float sin_theta_o = outgoing.x;
@@ -472,9 +472,9 @@ vec3f sample_hair_scattering(
   auto s            = brdf.s;
   auto sin_2k_alpha = brdf.sin_2k_alpha;
   auto cos_2k_alpha = brdf.cos_2k_alpha;
-  auto frame        = brdf.frame;
+  auto world_to_brdf        = brdf.world_to_brdf;
 
-  auto outgoing = transform_direction(frame, outgoing_);
+  auto outgoing = transform_direction(world_to_brdf, outgoing_);
 
   // Compute hair coordinate system terms related to _wo_
   float sin_theta_o = outgoing.x;
@@ -541,18 +541,21 @@ vec3f sample_hair_scattering(
 
   auto incoming = vec3f{
       sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
-  return transform_direction(inverse(frame), incoming);
+  return transform_direction(inverse(world_to_brdf), incoming);
 }
 
-vec3f UniformSampleSphere(const vec2f& u) {
+// HAIR SCATTERING TESTS
+
+vec3f uniform_sample_sphere(const vec2f& u) {
   float z   = 1 - 2 * u[0];
   float r   = std::sqrt(std::max(0.0f, 1.0f - z * z));
   float phi = 2 * pif * u[1];
   return vec3f{r * std::cos(phi), r * std::sin(phi), z};
 }
 
-void white_furnace_test(rng_state rng) {
-  vec3f wo = UniformSampleSphere(math::rand2f(rng));
+void white_furnace_test() {
+  rng_state rng = math::make_rng(199382389514);
+  vec3f wo = uniform_sample_sphere(math::rand2f(rng));
   for (float beta_m = .1; beta_m < 1; beta_m += .2) {
     for (float beta_n = .1; beta_n < 1; beta_n += .2) {
       // Estimate reflected uniform incident radiance from hair
@@ -570,7 +573,7 @@ void white_furnace_test(rng_state rng) {
         hair_brdf brdf = eval_hair_brdf(mat, h, zero3f, zero3f);
         brdf.sigma_a   = zero3f;
 
-        vec3f wi = UniformSampleSphere(math::rand2f(rng));
+        vec3f wi = uniform_sample_sphere(math::rand2f(rng));
 
         sum += eval_hair_scattering(brdf, wo, wi);
       }
@@ -578,17 +581,17 @@ void white_furnace_test(rng_state rng) {
                   (count * math::sample_sphere_pdf(zero3f));
       if (avg >= .95 && avg <= 1.05) {
       } else {
-        throw "error";
+        throw "FAILED!";
       }
     }
   }
-  printf("non trovato nulla \n");
+  printf("OK!\n");
   fflush(stdout);
 }
 
-// this pass
-void white_furnace_sampled_test(rng_state rng) {
-  vec3f wo = UniformSampleSphere(math::rand2f(rng));
+void white_furnace_sampled_test() {
+  rng_state rng = math::make_rng(199382389514);
+  vec3f wo = uniform_sample_sphere(math::rand2f(rng));
   for (float beta_m = .1; beta_m < 1; beta_m += .2) {
     for (float beta_n = .1; beta_n < 1; beta_n += .2) {
       // Estimate reflected uniform incident radiance from hair
@@ -615,16 +618,17 @@ void white_furnace_sampled_test(rng_state rng) {
       float avg = math::luminance(sum) / (count);
       if (avg >= .99 && avg <= 1.01) {
       } else {
-        throw "error";
+        throw "FAILED!";
       }
     }
   }
-  printf("non trovato nulla \n");
+  printf("OK!\n");
   fflush(stdout);
 }
 
-// this not work
-void white_furnace_weights_test(rng_state rng) {
+void sampling_weights_test() {
+  rng_state rng = math::make_rng(199382389514);
+
   for (float beta_m = .1; beta_m < 1; beta_m += .2) {
     for (float beta_n = .4; beta_n < 1; beta_n += .2) {
       // Estimate reflected uniform incident radiance from hair
@@ -640,7 +644,7 @@ void white_furnace_weights_test(rng_state rng) {
 
         hair_brdf brdf = eval_hair_brdf(mat, h, zero3f, zero3f);
         brdf.sigma_a   = zero3f;
-        vec3f wo       = UniformSampleSphere(math::rand2f(rng));
+        vec3f wo       = uniform_sample_sphere(math::rand2f(rng));
 
         vec3f wi  = sample_hair_scattering(brdf, wo, math::rand2f(rng));
         auto  pdf = sample_hair_scattering_pdf(brdf, wo, wi);
@@ -650,23 +654,24 @@ void white_furnace_weights_test(rng_state rng) {
           if (math::luminance(f) / pdf >= .999 &&
               math::luminance(f) * abs(wi.z) / pdf <= 1.001) {
           } else {
-            throw "error";
+            throw "FAILED!";
           }
         }
       }
     }
   }
-  printf("non trovato nulla \n");
+  printf("OK!\n");
   fflush(stdout);
 }
 
-void sampling_consistency_test(rng_state rng) {
+void sampling_consistency_test() {
+  rng_state rng = math::make_rng(199382389514);
   for (float beta_m = .2; beta_m < 1; beta_m += .2)
     for (float beta_n = .4; beta_n < 1; beta_n += .2) {
       // Declare variables for hair sampling test
       const int count   = 64 * 1024;
       vec3f     sigma_a = vec3f(.25);
-      vec3f     wo      = UniformSampleSphere(math::rand2f(rng));
+      vec3f     wo      = uniform_sample_sphere(math::rand2f(rng));
       auto      Li = [](const vec3f& w) -> vec3f { return vec3f(w.z * w.z); };
       vec3f     fImportance = vec3f(0), fUniform = vec3f(0);
       for (int i = 0; i < count; ++i) {
@@ -687,7 +692,7 @@ void sampling_consistency_test(rng_state rng) {
         pdf          = sample_hair_scattering_pdf(brdf, wo, wi);
         auto f       = eval_hair_scattering(brdf, wo, wi);
         if (pdf > 0) fImportance += f * Li(wi) / (count * pdf);
-        wi = UniformSampleSphere(u);
+        wi = uniform_sample_sphere(u);
         fUniform += eval_hair_scattering(brdf, wo, wi) * Li(wi) /
                     (count * math::sample_sphere_pdf(zero3f));
       }
@@ -698,12 +703,13 @@ void sampling_consistency_test(rng_state rng) {
       // EXPECT_LT(err, 0.05);
       if (err < 0.05) {
       } else {
-        printf("err: %f", err);
+        printf("Err: %f\n", err);
         fflush(stdout);
-        throw "error";
+        throw "FAILED!";
       }
     }
-  printf("non trovato nulla \n");
+  printf("OK!\n");
   fflush(stdout);
 }
+
 }  // namespace yocto::extension

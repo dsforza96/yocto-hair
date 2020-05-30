@@ -1381,9 +1381,11 @@ static vec4f trace_path(const ptr::scene* scene, const ray3f& ray_,
   auto volume_stack = std::vector<vsdf>{};
   auto hit          = false;
 
-  // white_furnace_test(rng);
-  // white_furnace_sampled_test(rng);
-  // white_furnace_weights_test(rng);
+  // extension::white_furnace_test();
+  // extension::white_furnace_sampled_test();
+  // extension::sampling_weights_test();
+  // extension::sampling_consistency_test();
+
   // trace  path
   for (auto bounce = 0; bounce < params.bounces; bounce++) {
     // intersect next point
