@@ -41,6 +41,9 @@ By changing the material parameters, it is possible to obtain different hairs lo
 The firts image is rendered with `beta_m = 0.1`, the second one with `beta_m = 0.25` and the third one with `beta_m = 0.6`. 
 
 ### Absortion in Fibers
+
+In the firts image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to black hairs), in the second one to `{0.84, 1.39, 2.74}` (brown hairs) and in the third one to `{0.06, 0.10, 0.20}` (blonde hairs).
+
 ### Aimuthal Scattering
 ### The Effect of Scales on Hair
 ## Tests
