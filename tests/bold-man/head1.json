@@ -1,0 +1,99 @@
+{
+  "asset": {
+    "copyright": "Model by 3DScanStore from www.3dscanstore.com",
+    "generator": "Yocto/GL - https://github.com/xelatihy/yocto-gl"
+  },
+  "cameras": {
+    "camera1": {
+      "aspect": 1.0,
+      "focus": 1.059059977531433,
+      "frame": [
+        0.8572059869766235,
+        0.0,
+        -0.5149739980697632,
+        -0.06380520015954971,
+        0.9922950267791748,
+        -0.10620799660682678,
+        0.5110059976577759,
+        0.12389999628067017,
+        0.8506010174751282,
+        0.5891259908676147,
+        0.42919299006462097,
+        0.8565430045127869
+      ],
+      "lens": 0.10000000149011612
+    }
+  },
+  "environments": {
+    "environment1": {
+      "emission": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_tex": "texture3"
+    },
+    "environment2": {
+      "emission": [
+        4.0,
+        4.0,
+        4.0
+      ],
+      "emission_tex": "texture3",
+      "frame": [
+        -0.707099974155426,
+        0.0,
+        -0.707099974155426,
+        0.0,
+        1.0,
+        0.0,
+        0.707099974155426,
+        0.0,
+        -0.707099974155426,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "materials": {
+    "blonde": {
+      "eumelanin": 0.2
+    },
+    "material1": {
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "color_tex": "texture1",
+      "displacement": 1.0,
+      "normal_tex": "texture2",
+      "roughness": 0.5
+    }
+  },
+  "objects": {
+    "hair": {
+      "frame": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1,
+        -1.2,
+        0.5,
+        0
+      ],
+      "shape": "curly1",
+      "material": "blonde"
+    },
+    "object1": {
+      "material": "material1",
+      "shape": "shape2"
+    }
+  }
+}

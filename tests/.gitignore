@@ -5,3 +5,6 @@ ybin
 pbrt
 
 **/*.ply
+**/texture1.png
+**/texture2.png
+**/texture3.hdr
