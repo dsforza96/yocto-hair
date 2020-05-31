@@ -23,9 +23,9 @@
   "environments": {
     "sky": {
       "emission": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ],
       "emission_tex": "sky",
       "frame": [

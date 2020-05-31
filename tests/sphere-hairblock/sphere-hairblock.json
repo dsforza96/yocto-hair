@@ -1,4 +1,7 @@
 {
+  "asset": {
+    "copyright": "Hair block model from www.pbrt.org/scenes-v3.html"
+  },
   "cameras": {
     "default": {
       "lens": 0.05,
