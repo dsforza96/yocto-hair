@@ -42,7 +42,7 @@
         0,
         0
       ],
-      "shape": "sphere1",
+      "shape": "sphere",
       "material": "diffuse"
     },
     "hairblock": {
@@ -73,10 +73,10 @@
       ]
     },
     "hair": {
-      "sigma_a": [
-        0.003,
-        0.046,
-        0.488
+      "color": [
+        0.8,
+        0.4,
+        0.05
       ]
     },
     "arealight": {

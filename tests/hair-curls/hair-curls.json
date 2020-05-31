@@ -60,7 +60,7 @@
         0,
         0
       ],
-      "shape": "hair_curl",
+      "shape": "hair-curl",
       "material": "black"
     },
     "red": {
@@ -78,7 +78,7 @@
         0,
         0
       ],
-      "shape": "hair_curl",
+      "shape": "hair-curl",
       "material": "red"
     },
     "brown": {
@@ -96,7 +96,7 @@
         0,
         0
       ],
-      "shape": "hair_curl",
+      "shape": "hair-curl",
       "material": "brown"
     },
     "blonde": {
@@ -114,7 +114,7 @@
         0,
         0
       ],
-      "shape": "hair_curl",
+      "shape": "hair-curl",
       "material": "blonde"
     },
     "arealight1": {
