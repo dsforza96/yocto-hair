@@ -46,8 +46,8 @@ The firts image is rendered with `beta_m = 0.1`, the second one with `beta_m = 0
 In the firts image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to black hairs), in the second one to `{0.84, 1.39, 2.74}` (brown hairs) and in the third one to `{0.06, 0.10, 0.20}` (blonde hairs).
 
 ### Azimuthal Scattering
-
 <img src="images/azimuthal_03_720_1536.png" width="300"/> <img src="images/azimuthal_06_720_1536.png" width="300"/> <img src="images/azimuthal_09_720_1536.png" width="300"/>
+
 The firts image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases hairs get brighter.
 
 ### The Effect of Scales on Hair
@@ -58,7 +58,7 @@ The firts image is rendered without `alpha` (`0` degrees), while the second one 
 To check the correctness of our implemetation we write the test described in pbrt. We pass both the test which check for energy conservation and the ones which validate the sampling routine. These tests where useful to find some errors in our implentation. They are included at the end of the file [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp).
 
 ## Yocto/GL Files Modifications
-Almost all our code is iside the [`yocto_extension.h`](libs/yocto_extension/yocto_extension.h) and [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp) file. However, we left some small modifications inside the main library:
+Almost all our code is inside the [`yocto_extension.h`](libs/yocto_extension/yocto_extension.h) and [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp) file. However, we left some small modifications inside the main library:
 - [`yocto_pbrt.h`](libs/yocto/yocto_pbrt.h), [`yocto_sceneio.cpp`](libs/yocto/yocto_sceneio.cpp) and [`yocto_sceneio.h`](libs/yocto/yocto_sceneio.h): to add lines support to *.pbrt* parsing and to read *.json* files containing the new material parameters;
 - [`yocto_pathtrace.cpp`](libs/yocto_pathtrace/yocto_pathtrace.cpp), [`yocto_pathtrace.h`](libs/yocto_pathtrace/yocto_pathtrace.h): to integrate our modifications into the path tracer.
 
