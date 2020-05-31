@@ -51,7 +51,7 @@ In the firts image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to b
 The firts image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases hairs get brighter.
 
 ### Scales on Hair Surface
-<div style="text-align:center"> <img src="images/alpha_0_720_1536.png" width="300"/> <img src="images/alpha_2_720_1536.png" width="300"/> </div>
+<p align="center"> <img src="images/alpha_0_720_1536.png" width="300"/> <img src="images/alpha_2_720_1536.png" width="300"/> </p>
 
 The firts image is rendered without `alpha` (`0` degrees), while the second one with `alpha` set too `2` degrees. Scales are responsible for the secondary colored highlight below the white one.
 
