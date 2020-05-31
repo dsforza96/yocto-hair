@@ -10,6 +10,8 @@ Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 We decided to test our implementation using hair models from [Benedikt Bitterli Rendering Resources](benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scenes format.
 Because Yocto/GL doesn't support Bézier curves we approximated them into straight lines. We used two lines for each Bézier curve to render straight hairs and four lines to render curly hairs. We also store lines tangents and linear interpolated widths for each vertex.  To optimize the rendering performance we joined all the lines into one only *.ply* shape.
 
+All converted models can be downloaded [here](https://drive.google.com/drive/folders/1dxACwl7tILq09_3m-KPaIRDEbdolVmo2?usp=sharing).
+
 ## Scattering Model Implementation
 We followed straightforwardly the implementation presented in pbrt. To respect the Yocto/GL convention, we implemented three new functions:
 - `eval_hair_scattering(...)`: Given incoming and outgoing directions computes the corrisponding BRDF lobes;
