@@ -7,7 +7,7 @@ Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 
 
 ## Geometry
-We decided to use hair models from [Benedikt Bitterli](benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scenes format.
+We decided to test our implementation using hair models from [Benedikt Bitterli Rendering Resources](benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scenes format.
 Because Yocto/GL doesn't support Bézier curves we approximated them into straight lines. We used two lines for each Bézier curve to render straight hairs and four lines to render curly hairs. We also store lines tangents and linear interpolated widths for each vertex.  To optimize the rendering performance we joined all the lines into one only *.ply* shape.
 
 ## Scattering Model Implementation
@@ -34,19 +34,23 @@ Hair color can be specified in three different ways: direclty with the `color` p
 By changing the material parameters, it is possible to obtain different hairs looks. In the following sections we show the effect of varying each parameter. 
 
 ### Longitudinal Scattering
-
 <img src="images/longitudinal_01_720_1536.png" width="300"/> <img src="images/longitudinal_025_720_1536.png" width="300"/> <img src="images/longitudinal_06_720_1536.png" width="300"/>
-
 
 The firts image is rendered with `beta_m = 0.1`, the second one with `beta_m = 0.25` and the third one with `beta_m = 0.6`. Longitudinal scattering is responsible for the highlight along the length of hair.
 
 ### Absortion in Fibers
-<img src="images/" width="300"/> <img src="images/absortion_brown_720_1536.png" width="300"/> <img src="images/" width="300"/>
+<img src="images/absortion_black_720_1536.png" width="300"/> <img src="images/absortion_brown_720_1536.png" width="300"/> <img src="images/" width="300"/>
 
 In the firts image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to black hairs), in the second one to `{0.84, 1.39, 2.74}` (brown hairs) and in the third one to `{0.06, 0.10, 0.20}` (blonde hairs).
 
 ### Aimuthal Scattering
+
+The firts image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases hairs get brighter.
+
 ### The Effect of Scales on Hair
+
+The firts image is rendered without `alpha` (`0` degrees), while the second one with `alpha` set too `2` degrees. Scales are responsible for the secondary colored highlight below the white one.
+
 ## Tests
 To check the correctness of our implemetation we write the test described in pbrt. We pass both the test which check for energy conservation and the ones which validate the sampling routine. These tests where useful to find some errors in our implentation. They are included at the end of the file [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp).
 
