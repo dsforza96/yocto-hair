@@ -47,6 +47,8 @@ In the firts image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to b
 
 ### Aimuthal Scattering
 
+images/azimuthal_03_720_1536.png
+<img src="images/images/azimuthal_03_720_1536.png" width="300"/> <img src="images/azimuthal_06_720_1536.png" width="300"/> <img src="images/azimuthal_09_720_1536.png" width="300"/>
 The firts image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases hairs get brighter.
 
 ### The Effect of Scales on Hair
