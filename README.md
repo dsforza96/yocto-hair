@@ -5,6 +5,7 @@
 Yocto/Hair is a tiny extension of [Yocto/GL](https://github.com/xelatihy/yocto-gl) to shade realistic looking hairs. 
 Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 
+<img src="images/hair_curls_1280_4096.png"/>
 
 ## Geometry
 We decided to test our implementation using hair models from [Benedikt Bitterli Rendering Resources](benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scenes format.
