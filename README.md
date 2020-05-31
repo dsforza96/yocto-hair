@@ -32,6 +32,10 @@ Hair color can be specified in three different ways: direclty with the `color` p
 
 ## Examples
 ### Longitudinal Scattering
+![beta_m_01](images/longitudinal_01_720_1536.png)
+![beta_m_025](images/longitudinal_025_720_1536.png)
+![beta_m_06](images/longitudinal_06_720_1536.png)
+
 ### Absortion in Fibers
 ### Aimuthal Scattering
 ### The Effect of Scales on Hair
@@ -40,7 +44,7 @@ To check the correctness of our implemetation we write the test described in pbr
 
 ## Yocto/GL Files Modifications
 Almost all our code is iside the [`yocto_extension.h`](libs/yocto_extension/yocto_extension.h) and [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp) file. However, we left some small modifications inside the main library:
-- [`yocto_pbrt.h`](libs/yocto/yocto_pbrt.h), [`yocto_sceneio.cpp`](libs/yocto/yocto_sceneio.cpp) and [`yocto_sceneio.h`](libs/yocto/yocto_sceneio.h): to parse *.pbrt* and *.json* containing the new material parameters;
+- [`yocto_pbrt.h`](libs/yocto/yocto_pbrt.h), [`yocto_sceneio.cpp`](libs/yocto/yocto_sceneio.cpp) and [`yocto_sceneio.h`](libs/yocto/yocto_sceneio.h): to add lines support to *.pbrt* parsing and to read *.json* files containing the new material parameters;
 - [`yocto_pathtrace.cpp`](libs/yocto_pathtrace/yocto_pathtrace.cpp), [`yocto_pathtrace.h`](libs/yocto_pathtrace/yocto_pathtrace.h): to integrate our modifications into the path tracer.
 
 ## License
