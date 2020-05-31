@@ -4,7 +4,10 @@ gltf
 ybin
 pbrt
 
-**/*.ply
+**/straight-hair.ply
+**/curly-hair.ply
+**/hair-curl.ply
+**/hair-block.ply
 **/texture1.png
 **/texture2.png
 **/texture3.hdr

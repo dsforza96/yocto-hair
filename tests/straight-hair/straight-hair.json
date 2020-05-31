@@ -1,4 +1,7 @@
 {
+  "asset": {
+    "copyright": "Model by Cem Yuksel from benedikt-bitterli.me/resources"
+  },
   "cameras": {
     "default": {
       "lens": 0.05,
