@@ -11,7 +11,7 @@ We decided to use hair models from [Benedikt Bitterli](benedikt-bitterli.me/reso
 Because Yocto/GL doesn't support Bézier curves we approximated them into straight lines. We used two lines for each Bézier curve to render straight hairs and four lines to render curly hairs. We also store lines tangents and linear interpolated widths for each vertex.  To optimize the rendering performance we joined all the lines into one only *.ply* shape.
 
 ## Scattering Model Implementation
-We followed straightforwardly the implementation presented in [pbrt](https://www.pbrt.org/hair.pdf). To respect the Yocto/GL convention, we implemented three new functions:
+We followed straightforwardly the implementation presented in pbrt. To respect the Yocto/GL convention, we implemented three new functions:
 - `eval_hair_scattering(...)`: Given incoming and outgoing directions computes the corrisponding BRDF lobe;
 - `sample_hair_scattering(...)`: Given the outgoing direction sample an incoming direction according to BRDF;
 - `eval_hair_scattering_pdf(...)`: Returns the PDF related to incoming and outgoing directions.
@@ -36,7 +36,12 @@ Hair color can be specified in three different ways: direclty with the `color` p
 ### Aimuthal Scattering
 ### The Effect of Scales on Hair
 ## Tests
+To check the correctness of our implemetation we write the test described in pbrt. We pass both the test which check for energy conservation and the ones which validate the sampling routine. These tests where useful to find some errors in our implentation. They are included at the end of the file [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp).
+
 ## Yocto/GL Files Modifications
+Almost all our code is iside the [`yocto_extension.h`](libs/yocto_extension/yocto_extension.h) and [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp) file. However, we left some small modifications inside the main library:
+- [`yocto_pbrt.h`](), [`yocto_sceneio.cpp`]() and [`yocto_sceneio.h`]():
+- [`yocto_pathtrace.cpp`](libs/yocto_pathtrace/yocto_pathtrace.cpp), [`yocto_pathtrace.h`](libs/yocto_pathtrace/yocto_pathtrace.h): to integrate our modifications 
 
 ## License
 Our code is released under [MIT](LICENSE) license.
