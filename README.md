@@ -32,10 +32,8 @@ Hair color can be specified in three different ways: direclty with the `color` p
 
 ## Examples
 ### Longitudinal Scattering
-![beta_m_01](images/longitudinal_01_720_1536.png)
-![beta_m_025](images/longitudinal_025_720_1536.png)
-![beta_m_06](images/longitudinal_06_720_1536.png)
 
+<img src="images/longitudinal_01_720_1536.png" width="300"/> <img src="images/longitudinal_025_720_1536.png" width="300"/> <img src="images/longitudinal_06_720_1536.png" width="300"/>
 ### Absortion in Fibers
 ### Aimuthal Scattering
 ### The Effect of Scales on Hair
