@@ -31,9 +31,15 @@ We extended the `material` structure with the parameters needed for hairs. These
 Hair color can be specified in three different ways: direclty with the `color` parameter, through the absortion coefficient `sigma_a` or with the concentration of `eumelanin` and `pheomelanin`, which are the two pigments that determine the color in human hairs.
 
 ## Examples
+By changing the material parameters, it is possible to obtain different hairs looks. In the following sections we show the effect of varying each parameter. 
+
 ### Longitudinal Scattering
 
 <img src="images/longitudinal_01_720_1536.png" width="300"/> <img src="images/longitudinal_025_720_1536.png" width="300"/> <img src="images/longitudinal_06_720_1536.png" width="300"/>
+
+
+The firts image is rendered with `beta_m = 0.1`, the second one with `beta_m = 0.25` and the third one with `beta_m = 0.6`. 
+
 ### Absortion in Fibers
 ### Aimuthal Scattering
 ### The Effect of Scales on Hair
