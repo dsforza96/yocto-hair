@@ -1765,15 +1765,7 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     auto p1 = beziers[1];
     auto p2 = beziers[2];
     auto p3 = beziers[3];
-
-    // auto value_to_add = 1.0f / 8.0f;
-    // auto sum = 0.0f;
-    // for (auto i = 0; i < 8; i++) {
-    //   shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
-    //   sum += value_to_add;
-    //   if (sum > 1.0f) sum = 1.0f;
-    // }
-
+    
     int number_sub = 4;
 
     auto value_to_add = 1.0f / number_sub;
