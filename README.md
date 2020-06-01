@@ -76,4 +76,4 @@ To render our scenes you have to download the hair models from [here](https://dr
 ![](images/bold_man_1280_1024.png)
 
 ## License
-Our code is released under [MIT license](LICENSE). Licenses informations for the models we used can be foud in this file.
+Our code is released under [MIT license](LICENSE). License informations for the models we used can be foud in [this file](tests/license.txt).
