@@ -66,7 +66,7 @@ Almost all our code is inside the [`yocto_extension.h`](libs/yocto_extension/yoc
 
 ## How to Use
 To compile the library follows the instructions in [Yocto/GL](https://github.com/xelatihy/yocto-gl) repository. 
-To render our scenes you have to download the hair models from [here](https://drive.google.com/drive/folders/1dxACwl7tILq09_3m-KPaIRDEbdolVmo2?usp=sharing), for example if you want to render the curly hair you have to put the `curly-hair.ply` model in the [`tests/curly-hair/shapes/`](tests/curly-hair/shapes/) directory and then rum the command:
+To render our scenes you have to download the hair models from [here](https://drive.google.com/drive/folders/1dxACwl7tILq09_3m-KPaIRDEbdolVmo2?usp=sharing), for example if you want to render the curly hair you have to put the `curly-hair.ply` model in the [`tests/curly-hair/shapes/`](tests/curly-hair/shapes/) directory and run the command:
 ```bash 
 ./bin/yscenetrace tests/curly-hair/curly-hair.json -o images/out.png -t path -s 1536 -r 720
 ```
