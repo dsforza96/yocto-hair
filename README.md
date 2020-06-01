@@ -40,22 +40,22 @@ By changing the above parameters, it is possible to obtain different hair looks.
 ### Longitudinal Scattering
 <img src="images/longitudinal_01_720_1536.png" width="300"/> <img src="images/longitudinal_025_720_1536.png" width="300"/> <img src="images/longitudinal_06_720_1536.png" width="300"/>
 
-The firts image is rendered with `beta_m = 0.1`, the second one with `beta_m = 0.25` and the third one with `beta_m = 0.6`. Longitudinal scattering is responsible for the highlight along the length of hair and the roughness controls the sharpness of this highlight.
+The first image is rendered with `beta_m = 0.1`, the second one with `beta_m = 0.25` and the third one with `beta_m = 0.6`. Longitudinal scattering is responsible for the highlight along the length of hair and the roughness controls the sharpness of this highlight.
 
 ### Absortion in Fibers
 <img src="images/absortion_black_720_1536.png" width="300"/> <img src="images/absortion_brown_720_1536.png" width="300"/> <img src="images/absortion_blonde_720_1536.png" width="300"/>
 
-In the firts image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to black hair), in the second one to `{0.84, 1.39, 2.74}` (brown hair) and in the third one to `{0.06, 0.10, 0.20}` (blonde hair).
+In the first image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to black hair), in the second one to `{0.84, 1.39, 2.74}` (brown hair) and in the third one to `{0.06, 0.10, 0.20}` (blonde hair).
 
 ### Azimuthal Scattering
 <img src="images/azimuthal_03_720_1536.png" width="300"/> <img src="images/azimuthal_06_720_1536.png" width="300"/> <img src="images/azimuthal_09_720_1536.png" width="300"/>
 
-The firts image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases, hairs get brighter.
+The first image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases, hairs get brighter.
 
 ### Scales on Hair Surface
 <p align="center"> <img src="images/alpha_0_720_1536.png" width="300"/> <img src="images/alpha_2_720_1536.png" width="300"/> </p>
 
-The firts image is rendered without `alpha` (`0` degrees), while the second one with `alpha` set to `2` degrees. Scales on the hair surface are responsible for the secondary colored highlight below the white one.
+The first image is rendered without `alpha` (`0` degrees), while the second one with `alpha` set to `2` degrees. Scales on the hair surface are responsible for the secondary colored highlight below the white one.
 
 ## Tests
 To check the correctness of our implemetation, we wrote the tests described in the pbrt chapter. Our code passes both the test which checks for energy conservation and the ones which validate the sampling routine. These tests have been useful to find and fix some errors we made during the implentation. They are included at the end of the file [`yocto_extension.cpp`](libs/yocto_extension/yocto_extension.cpp).
