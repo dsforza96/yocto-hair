@@ -70,7 +70,7 @@ To compile the library follow the instructions in the [Yocto/GL](https://github.
 To render our scenes you have to download the hair models from [here](https://drive.google.com/drive/folders/1dxACwl7tILq09_3m-KPaIRDEbdolVmo2?usp=sharing). For example if you want to render the curly hair scene you have to put the `curly-hair.ply` model in the [`tests/curly-hair/shapes/`](tests/curly-hair/shapes/) directory and run the command:
 
 ```bash
-./bin/yscenetrace tests/curly-hair/curly-hair.json -o out/out.png -t path -s 1536 -r 720
+./bin/yscenetrace tests/curly-hair/curly-hair.json -o out/curly-hair.png -t path -s 1536 -r 720
 ```
 
 ![](images/bold_man_1280_1024.png)
