@@ -1750,10 +1750,6 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     return true;
   } else if (command.type == "curve") {
     // Load curve type
-    shape->positions = {};
-    shape->lines = {};
-    shape->radius = {};
-
     float width0 = 0;
     float width1 = 0;
     std::string curve_type;
@@ -1778,17 +1774,36 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     //   if (sum > 1.0f) sum = 1.0f;
     // }
 
+    int number_sub = 4;
+
+    auto value_to_add = 1.0f / number_sub;
+    auto sum = 0.0f;
     shape->positions.push_back(p0);
+    for (auto i = 1; i <= number_sub; i++) {
+      sum += value_to_add;
+      shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
+    }
     shape->positions.push_back(p3);
 
     for ( auto i = size_prec; i < shape->positions.size(); i++) {
       if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
     }
 
-    shape->normals.push_back((p1 - p0) * 3);
-    shape->normals.push_back((p3 - p2) * 3);
-  
+    shape->normals.push_back(normalize(p1 - p0));
+    sum = 0.0f;
+    for (auto i = 1; i <= number_sub; i++) {
+      sum += value_to_add;
+      shape->normals.push_back(normalize(math::interpolate_bezier_derivative(p0, p1, p2, p3,sum)));
+    }
+    shape->normals.push_back(normalize(p3 - p2));
+
+
     shape->radius.push_back(width0);
+    sum = 0.0f;
+    for (auto i = 1; i <= number_sub; i++) {
+      sum += value_to_add;
+      shape->radius.push_back(math::lerp(width0, width1, sum));
+    }
     shape->radius.push_back(width1);
 
     return true;
