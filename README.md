@@ -8,7 +8,7 @@ Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 ![](images/hair_curls_1280_4096.png)
 
 ## Geometry
-We decided to test our implementation using hair models from [Benedikt Bitterli Rendering Resources](benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scene format.
+We decided to test our implementation using hair models from [Benedikt Bitterli Rendering Resources](https://benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scene format.
 Because Yocto/GL does not support Bézier curves, we approximated them with straight lines. We used two and four lines for each Bézier curve to render straight and curly hairs, respectively. We also stored curves tangents and linear interpolated widths for each vertex. To optimize rendering performances, we joined all the lines belonging to the same model into one only *.ply* shape.
 
 All converted models can be downloaded [here](https://drive.google.com/drive/folders/1dxACwl7tILq09_3m-KPaIRDEbdolVmo2?usp=sharing).
@@ -19,7 +19,7 @@ Our implementation follows straightforwardly the one presented in the pbrt chapt
 - `sample_hair_scattering(...)`: given an outgoing direction, samples an incoming direction according to the hair BRDF;
 - `eval_hair_scattering_pdf(...)`: returns the PDF for hair BRDF lobes sampling related to the given incoming and outgoing directions.
 
-The function `eval_hair_brdf(...)` is responsible to evaluate the input hair material together with the *v* coordinate of the ray-line intersection and to return the correspondig hair BRDF lobes. Since pbrt computations are made in BRDF coordinate system, we built a frame to convert from world to local BRDF coordinate systems and vice versa. The *z* axis of this frame is orientend along the shading normal, while the *x* axis is orientend along the line tangent.
+The function `eval_hair_brdf(...)` is responsible to evaluate the input hair material together with the *v* coordinate of the ray-line intersection and to return the correspondig hair BRDF lobes. Since pbrt computations are made in the BRDF coordinate system, we built a frame to convert from world to local BRDF coordinate systems and vice versa. The *z* axis of this frame is orientend along the shading normal, while the *x* axis is orientend along the line tangent.
 
 ## Hair Material
 We extended the `material` structure present in Yocto/GL with the parameters needed for hair shading. These parameters are:
@@ -32,7 +32,7 @@ We extended the `material` structure present in Yocto/GL with the parameters nee
 - `pheomelanin`: the pheomelanin concentration.
 
 Hair color can be specified in three different ways: direclty with the `color` parameter, through the absortion coefficient `sigma_a` or with the concentration of `eumelanin` and/or `pheomelanin`, which are the two pigments that determine the color in human hair.
-An Eumelanin concentration of about 8 gives black hair, 1.3 brown hair and 0.3 blonde hair. Pheomelanin is responsible for orage and red hairs.
+An eumelanin concentration of about 8 gives black hair, 1.3 brown hair and 0.3 blonde hair. Pheomelanin is responsible for orage and red hairs.
 
 ## Examples
 By changing the above parameters, it is possible to obtain different hair looks. In the following examples we show the effect of the variation of each parameter. All images have been rendered at the resolution of 720x720 pixels with 1536 samples per pixel.
