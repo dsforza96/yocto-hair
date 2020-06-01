@@ -1771,7 +1771,7 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     auto value_to_add = 1.0f / number_sub;
     auto sum = 0.0f;
     shape->positions.push_back(p0);
-    for (auto i = 1; i <= number_sub; i++) {
+    for (auto i = 1; i < number_sub; i++) {
       sum += value_to_add;
       shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
     }
@@ -1783,7 +1783,7 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
 
     shape->normals.push_back(normalize(p1 - p0));
     sum = 0.0f;
-    for (auto i = 1; i <= number_sub; i++) {
+    for (auto i = 1; i < number_sub; i++) {
       sum += value_to_add;
       shape->normals.push_back(normalize(math::interpolate_bezier_derivative(p0, p1, p2, p3,sum)));
     }
@@ -1792,7 +1792,7 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
 
     shape->radius.push_back(width0);
     sum = 0.0f;
-    for (auto i = 1; i <= number_sub; i++) {
+    for (auto i = 1; i < number_sub; i++) {
       sum += value_to_add;
       shape->radius.push_back(math::lerp(width0, width1, sum));
     }
