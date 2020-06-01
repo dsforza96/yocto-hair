@@ -19,7 +19,7 @@ Our implementation follows straightforwardly the one presented in the pbrt chapt
 - `sample_hair_scattering(...)`: given an outgoing direction, samples an incoming direction according to the hair BRDF;
 - `eval_hair_scattering_pdf(...)`: returns the PDF for hair BRDF lobes sampling related to the given incoming and outgoing directions.
 
-The function `eval_hair_brdf(...)` is responsible to evaluate the input hair material together with the *v* coordinate of the ray-line intersection and to return the correspondig hair BRDF lobes. Since pbrt computations are made in the BRDF coordinate system, we built a frame to convert from world to local BRDF coordinate systems and vice versa. The *z* axis of this frame is orientend along the shading normal, while the *x* axis is orientend along the line tangent.
+The function `eval_hair_brdf(...)` is responsible to evaluate the input hair material together with the *v* coordinate of the ray-line intersection and to return the corresponding hair BRDF lobes. Since pbrt computations are made in the BRDF coordinate system, we built a frame to convert from world to local BRDF coordinate systems and vice versa. The *z* axis of this frame is orientend along the shading normal, while the *x* axis is orientend along the line tangent.
 
 ## Hair Material
 We extended the `material` structure present in Yocto/GL with the parameters needed for hair shading. These parameters are:
