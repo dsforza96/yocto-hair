@@ -562,19 +562,19 @@ void white_furnace_test() {
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
 #else
-        auto  h = rand1f(rng);
+        auto h = rand1f(rng);
 #endif
         // The original pbrt test fails with h = 0
         if (h == 0) h += flt_eps;
 
-        hair_material mat = {};
-        mat.beta_m        = beta_m;
-        mat.beta_n        = beta_n;
-        mat.alpha         = 0;
+        auto mat   = hair_material{};
+        mat.beta_m = beta_m;
+        mat.beta_n = beta_n;
+        mat.alpha  = 0;
 
-        hair_brdf brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
 
-        vec3f wi = sample_sphere(rand2f(rng));
+        auto wi = sample_sphere(rand2f(rng));
 
         sum += eval_hair_scattering(brdf, wo, wi);
       }
@@ -599,14 +599,14 @@ void white_furnace_sampled_test() {
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
 #else
-        auto  h = rand1f(rng);
+        auto h = rand1f(rng);
 #endif
-        hair_material mat = {};
-        mat.beta_m        = beta_m;
-        mat.beta_n        = beta_n;
-        mat.alpha         = 0;
+        auto mat   = hair_material{};
+        mat.beta_m = beta_m;
+        mat.beta_n = beta_n;
+        mat.alpha  = 0;
 
-        hair_brdf brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
 
         auto wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
         auto pdf = sample_hair_scattering_pdf(brdf, wo, wi);
@@ -624,40 +624,35 @@ void white_furnace_sampled_test() {
 }
 
 void sampling_weights_test() {
-  rng_state rng = make_rng(199382389514);
+  auto rng = make_rng(199382389514);
 
-  for (float beta_m = .1; beta_m < 1; beta_m += .2) {
-    for (float beta_n = .4; beta_n < 1; beta_n += .2) {
+  for (auto beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.2f) {
+    for (auto beta_n = 0.4f; beta_n < 1.0f; beta_n += 0.2f) {
       // Estimate reflected uniform incident radiance from hair
-      int count = 10000;
-      for (int i = 0; i < count; ++i) {
+      auto count = 10000;
+      for (auto i = 0; i < count; ++i) {
 #ifdef YOCTO_EMBREE
-        float h = -1.0f + 2.0f * rand1f(rng);
+        auto h = -1 + 2 * rand1f(rng);
 #else
-        float h = rand1f(rng);
+        auto h = rand1f(rng);
 #endif
-        vec3f         sigma_a = zero3f;
-        hair_material mat     = {};
-        mat.sigma_a           = sigma_a;
-        mat.beta_m            = beta_m;
-        mat.beta_n            = beta_n;
-        mat.alpha             = 0.0f;
+        auto mat   = hair_material{};
+        mat.beta_m = beta_m;
+        mat.beta_n = beta_n;
+        mat.alpha  = 0;
 
-        hair_brdf brdf     = eval_hair_brdf(mat, h, zero3f, zero3f);
-        brdf.world_to_brdf = identity3x4f;
-        brdf.sigma_a       = zero3f;
-        vec3f wo           = sample_sphere(rand2f(rng));
+        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
 
-        vec3f wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
-        auto  pdf = sample_hair_scattering_pdf(brdf, wo, wi);
-        auto  f   = eval_hair_scattering(brdf, wo, wi);
+        auto wo = sample_sphere(rand2f(rng));
+
+        auto wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
+        auto pdf = sample_hair_scattering_pdf(brdf, wo, wi);
+        auto f   = eval_hair_scattering(brdf, wo, wi);
         // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
         if (pdf > 0) {
-          if (luminance(f) / pdf >= .999 &&
-              luminance(f) * abs(wi.z) / pdf <= 1.001) {
-          } else {
+          if (!(luminance(f) / pdf >= .999 &&
+                  luminance(f) * abs(wi.z) / pdf <= 1.001))
             throw std::runtime_error("TEST FAILED!");
-          }
         }
       }
     }
@@ -682,7 +677,7 @@ void sampling_consistency_test() {
 #ifdef YOCTO_EMBREE
         auto h = -1.0f + 2.0f * rand1f(rng);
 #else
-        auto  h = rand1f(rng);
+        auto h = rand1f(rng);
 #endif
         auto mat    = hair_material{};
         mat.sigma_a = sigma_a;
