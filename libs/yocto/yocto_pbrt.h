@@ -118,7 +118,7 @@ struct shape {
   std::vector<vec2f> texcoords = {};
   std::vector<vec3i> triangles = {};
   std::vector<float> radius    = {};
-  std::vector<vec2i> lines = {};
+  std::vector<vec2i> lines     = {};
   // material
   pbrt::material* material = nullptr;
 };
@@ -1750,11 +1750,11 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     return true;
   } else if (command.type == "curve") {
     // Load curve type
-    float width0 = 0;
-    float width1 = 0;
-    std::string curve_type;
-    int size_prec = (int) shape->positions.size();
-    std::vector<vec3f> beziers = {};
+    std::vector<vec3f> beziers;
+    float              width0;
+    float              width1;
+    std::string        curve_type;
+    auto               size_prec = (int)shape->positions.size();
 
     if (!get_value(command.values, "P", beziers)) return parse_error();
     if (!get_value(command.values, "width0", width0)) return parse_error();
@@ -1765,36 +1765,31 @@ inline bool convert_shape(pbrt::shape* shape, const command& command,
     auto p1 = beziers[1];
     auto p2 = beziers[2];
     auto p3 = beziers[3];
-    
-    int number_sub = 4;
 
-    auto value_to_add = 1.0f / number_sub;
-    auto sum = 0.0f;
+    auto number_sub = 4;
+
     shape->positions.push_back(p0);
     for (auto i = 1; i < number_sub; i++) {
-      sum += value_to_add;
-      shape->positions.push_back(math::interpolate_bezier(p0, p1, p2, p3, sum));
+      shape->positions.push_back(
+          math::interpolate_bezier(p0, p1, p2, p3, (float)i / number_sub));
     }
     shape->positions.push_back(p3);
 
-    for ( auto i = size_prec; i < shape->positions.size(); i++) {
-      if (i + 1 < shape->positions.size()) shape->lines.push_back(vec2i{i, i+1});
+    for (auto i = size_prec; i < shape->positions.size() - 1; i++) {
+      shape->lines.push_back(vec2i{i, i + 1});
     }
 
     shape->normals.push_back(normalize(p1 - p0));
-    sum = 0.0f;
     for (auto i = 1; i < number_sub; i++) {
-      sum += value_to_add;
-      shape->normals.push_back(normalize(math::interpolate_bezier_derivative(p0, p1, p2, p3,sum)));
+      shape->normals.push_back(normalize(math::interpolate_bezier_derivative(
+          p0, p1, p2, p3, (float)i / number_sub)));
     }
     shape->normals.push_back(normalize(p3 - p2));
 
-
     shape->radius.push_back(width0);
-    sum = 0.0f;
     for (auto i = 1; i < number_sub; i++) {
-      sum += value_to_add;
-      shape->radius.push_back(math::lerp(width0, width1, sum));
+      shape->radius.push_back(
+          math::lerp(width0, width1, (float)i / number_sub));
     }
     shape->radius.push_back(width1);
 

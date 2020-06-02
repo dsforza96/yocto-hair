@@ -1270,9 +1270,9 @@ static bool load_json_scene(const std::string& filename, scn::model* scene,
       auto material  = add_material(scene);
       material->name = name;
 
-      // Hair materials
-      if (!get_value(ejs, "pheomelanin", material->pheomelanin)) return false;
+      // hair material
       if (!get_value(ejs, "eumelanin", material->eumelanin)) return false;
+      if (!get_value(ejs, "pheomelanin", material->pheomelanin)) return false;
       if (!get_value(ejs, "sigma_a", material->sigma_a)) return false;
       if (!get_value(ejs, "beta_m", material->beta_m)) return false;
       if (!get_value(ejs, "beta_n", material->beta_n)) return false;
@@ -1484,9 +1484,9 @@ static bool save_json_scene(const std::string& filename,
   for (auto material : scene->materials) {
     auto& ejs = js["materials"][material->name];
 
-    
-    add_opt(ejs, "pheomelanin", material->pheomelanin, def_material.pheomelanin);
+    // hair material
     add_opt(ejs, "eumelanin", material->eumelanin, def_material.eumelanin);
+    add_opt(ejs, "pheomelanin", material->pheomelanin, def_material.pheomelanin);
     add_opt(ejs, "sigma_a", material->sigma_a, def_material.sigma_a);
     add_opt(ejs, "beta_m", material->beta_m, def_material.beta_m);
     add_opt(ejs, "beta_n", material->beta_n, def_material.beta_n);
@@ -2577,8 +2577,8 @@ static bool load_pbrt_scene(const std::string& filename, scn::model* scene,
     object->shape->normals   = pshape->normals;
     object->shape->texcoords = pshape->texcoords;
     object->shape->triangles = pshape->triangles;
-    object->shape->lines = pshape->lines;
-    object->shape->radius = pshape->radius;
+    object->shape->lines     = pshape->lines;
+    object->shape->radius    = pshape->radius;
     for (auto& uv : object->shape->texcoords) uv.y = 1 - uv.y;
     object->material = material_map.at(pshape->material);
   }

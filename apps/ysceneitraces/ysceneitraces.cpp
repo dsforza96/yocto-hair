@@ -141,6 +141,7 @@ void init_scene(ptr::scene* scene, sio::model* ioscene, ptr::camera*& camera,
     set_beta_n(material,iomaterial->beta_n );
     set_alpha(material,iomaterial->alpha );
     set_eta(material,iomaterial->eta );
+
     set_emission(material, iomaterial->emission,
         texture_map.at(iomaterial->emission_tex));
     set_color(

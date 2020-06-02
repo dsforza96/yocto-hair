@@ -38,9 +38,8 @@
 using namespace std::string_literals;
 
 #ifdef YOCTO_EMBREE
-#include <embree3/rtcore.h>
-
 #include <cstring>
+#include <embree3/rtcore.h>
 #endif
 
 // -----------------------------------------------------------------------------
@@ -89,7 +88,6 @@ using yocto::extension::eval_hair_brdf;
 using yocto::extension::eval_hair_scattering;
 using yocto::extension::hair_brdf;
 using yocto::extension::hair_material;
-using yocto::extension::p_max;
 using yocto::extension::sample_hair_scattering;
 using yocto::extension::sample_hair_scattering_pdf;
 
@@ -474,9 +472,15 @@ static brdf eval_brdf(const ptr::object* object, int element, const vec2f& uv,
   // hair brdf
   brdf.hair = !object->shape->lines.empty();
   if (brdf.hair) {
-    auto hair_material = extension::hair_material{material->sigma_a,
-        material->beta_m, material->beta_n, material->alpha, material->eta,
-        material->color, material->eumelanin, material->pheomelanin};
+    auto hair_material        = extension::hair_material{};
+    hair_material.sigma_a     = material->sigma_a;
+    hair_material.beta_m      = material->beta_m;
+    hair_material.beta_n      = material->beta_n;
+    hair_material.alpha       = material->alpha;
+    hair_material.eta         = material->eta;
+    hair_material.color       = material->color;
+    hair_material.eumelanin   = material->eumelanin;
+    hair_material.pheomelanin = material->pheomelanin;
 
     auto v       = uv.y;
     auto tangent = eval_normal(object, element, uv);
