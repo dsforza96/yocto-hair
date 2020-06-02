@@ -155,7 +155,7 @@ hair_brdf eval_hair_brdf(const hair_material& material, float v,
       0.726f * beta_m + 0.812f * sqr(beta_m) + 3.7f * pow<20>(beta_m));
   brdf.v[1] = 0.25f * brdf.v[0];
   brdf.v[2] = 4 * brdf.v[0];
-  for (auto p = 3; p <= p_max; ++p) brdf.v[p] = brdf.v[2];
+  for (auto p = 3; p <= p_max; p++) brdf.v[p] = brdf.v[2];
 
   // Compute azimuthal logistic scale factor from $\beta_n$
   brdf.s = sqrt_pi_over_8f *
@@ -164,7 +164,7 @@ hair_brdf eval_hair_brdf(const hair_material& material, float v,
   // Compute $\alpha$ terms for hair scales
   brdf.sin_2k_alpha[0] = sin(pif / 180 * brdf.alpha);
   brdf.cos_2k_alpha[0] = safe_sqrt(1 - sqr(brdf.sin_2k_alpha[0]));
-  for (auto i = 1; i < 3; ++i) {
+  for (auto i = 1; i < 3; i++) {
     brdf.sin_2k_alpha[i] = 2 * brdf.cos_2k_alpha[i - 1] *
                            brdf.sin_2k_alpha[i - 1];
     brdf.cos_2k_alpha[i] = sqr(brdf.cos_2k_alpha[i - 1]) -
@@ -182,7 +182,7 @@ inline float i0(float x) {
   int64_t ifact = 1;
   int     i4    = 1;
   // I0(x) \approx Sum_i x^(2i) / (4^i (i!)^2)
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 10; i++) {
     if (i > 1) ifact *= i;
     val += x2i / (i4 * ifact * ifact);
     x2i *= x * x;
@@ -222,7 +222,7 @@ static std::array<vec3f, p_max + 1> ap(
   ap[1] = sqr(1 - f) * T;
 
   // Compute attenuation terms up to $p=_pMax_$
-  for (auto p = 2; p < p_max; ++p) ap[p] = ap[p - 1] * T * f;
+  for (auto p = 2; p < p_max; p++) ap[p] = ap[p - 1] * T * f;
 
   // Compute attenuation term accounting for remaining orders of scattering
   ap[p_max] = ap[p_max - 1] * f * T / (vec3f(1.f) - T * f);
@@ -294,7 +294,7 @@ vec3f eval_hair_scattering(
   auto phi  = phi_i - phi_o;
   auto ap   = ext::ap(cos_theta_o, eta, h, T);
   auto fsum = zero3f;
-  for (auto p = 0; p < p_max; ++p) {
+  for (auto p = 0; p < p_max; p++) {
     // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
     auto sin_theta_op = 0.0f;
     auto cos_theta_op = 0.0f;
@@ -390,10 +390,10 @@ static std::array<float, p_max + 1> compute_ap_pdf(
   // Compute $A_p$ PDF from individual $A_p$ terms
   auto ap_pdf = std::array<float, p_max + 1>{};
   auto sum_y  = 0.0f;
-  for (auto i = 0; i <= p_max; ++i) {
+  for (auto i = 0; i <= p_max; i++) {
     sum_y += luminance(ap[i]);
   }
-  for (auto i = 0; i <= p_max; ++i) {
+  for (auto i = 0; i <= p_max; i++) {
     ap_pdf[i] = luminance(ap[i]) / sum_y;
   }
   return ap_pdf;
@@ -423,7 +423,7 @@ vec3f sample_hair_scattering(
   // Determine which term $p$ to sample for hair scattering
   auto ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
   auto p      = 0;
-  for (p = 0; p < p_max; ++p) {
+  for (p = 0; p < p_max; p++) {
     if (u[0][0] < ap_pdf[p]) break;
     u[0][0] -= ap_pdf[p];
   }
@@ -516,7 +516,7 @@ float sample_hair_scattering_pdf(
   // Compute PDF sum for hair scattering events
   auto phi = phi_i - phi_o;
   auto pdf = 0.0f;
-  for (auto p = 0; p < p_max; ++p) {
+  for (auto p = 0; p < p_max; p++) {
     // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
     auto sin_theta_op = 0.0f;
     auto cos_theta_op = 0.0f;
@@ -563,7 +563,7 @@ void white_furnace_test() {
       // Estimate reflected uniform incident radiance from hair
       auto sum   = zero3f;
       auto count = 300000;
-      for (auto i = 0; i < count; ++i) {
+      for (auto i = 0; i < count; i++) {
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
 #else
@@ -571,7 +571,6 @@ void white_furnace_test() {
 #endif
         // the original pbrt test fails with h = 0
         if (h == 0) h += flt_eps;
-
         auto mat   = hair_material{};
         mat.beta_m = beta_m;
         mat.beta_n = beta_n;
@@ -596,7 +595,7 @@ void white_furnace_sampled_test() {
     for (auto beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.2f) {
       auto sum   = zero3f;
       auto count = 300000;
-      for (auto i = 0; i < count; ++i) {
+      for (auto i = 0; i < count; i++) {
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
 #else
@@ -626,7 +625,7 @@ void sampling_weights_test() {
   for (auto beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.2f) {
     for (auto beta_n = 0.4f; beta_n < 1.0f; beta_n += 0.2f) {
       auto count = 10000;
-      for (auto i = 0; i < count; ++i) {
+      for (auto i = 0; i < count; i++) {
         // Check _HairBSDF::Sample\_f()_ sample weight
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
@@ -664,7 +663,7 @@ void sampling_consistency_test() {
       auto       wo      = sample_sphere(rand2f(rng));
       auto       li = [](const vec3f& w) -> vec3f { return vec3f(w.z * w.z); };
       auto       f_importance = vec3f(0), f_uniform = vec3f(0);
-      for (auto i = 0; i < count; ++i) {
+      for (auto i = 0; i < count; i++) {
         // Compute estimates of scattered radiance for hair sampling test
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
