@@ -84,6 +84,7 @@ namespace yocto::extension {
 static const float sqrt_pi_over_8f = 0.626657069f;
 
 inline float sqr(float v) { return v * v; }
+inline vec3f sqr(vec3f v) { return v * v; }
 
 template <int n>
 static float pow(float v) {
@@ -106,21 +107,15 @@ inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
 inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
 
 static vec3f sigma_a_from_concentration(float ce, float cp) {
-  vec3f sigma_a;
   vec3f eumelanin_sigma_a   = {0.419f, 0.697f, 1.37f};
   vec3f pheomelanin_sigma_a = {0.187f, 0.4f, 1.05f};
-  sigma_a = (ce * eumelanin_sigma_a + cp * pheomelanin_sigma_a);
-  return sigma_a;
+  return ce * eumelanin_sigma_a + cp * pheomelanin_sigma_a;
 }
 
 static vec3f sigma_a_from_reflectance(const vec3f& c, float beta_n) {
-  vec3f sigma_a;
-  for (int i = 0; i < 3; ++i)
-    sigma_a[i] = sqr(
-        log(c[i]) / (5.969f - 0.215f * beta_n + 2.532f * sqr(beta_n) -
+  return sqr(log(c) / (5.969f - 0.215f * beta_n + 2.532f * sqr(beta_n) -
                         10.73f * pow<3>(beta_n) + 5.574f * pow<4>(beta_n) +
                         0.245f * pow<5>(beta_n)));
-  return sigma_a;
 }
 
 hair_brdf eval_hair_brdf(const hair_material& material, float v,
