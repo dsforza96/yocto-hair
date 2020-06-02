@@ -403,23 +403,24 @@ vec3f sample_hair_scattering(
   auto outgoing = transform_direction(world_to_brdf, outgoing_);
 
   // Compute hair coordinate system terms related to _wo_
-  float sin_theta_o = outgoing.x;
-  float cos_theta_o = safe_sqrt(1 - sqr(sin_theta_o));
-  float phi_o       = atan2(outgoing.z, outgoing.y);
+  auto sin_theta_o = outgoing.x;
+  auto cos_theta_o = safe_sqrt(1 - sqr(sin_theta_o));
+  auto phi_o       = atan2(outgoing.z, outgoing.y);
 
   // Derive four random samples from _u2_
-  vec2f u[2] = {demux_float(u2[0]), demux_float(u2[1])};
+  auto u = std::array{demux_float(u2[0]), demux_float(u2[1])};
 
   // Determine which term $p$ to sample for hair scattering
-  std::array<float, p_max + 1> ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
-  int                          p;
+  auto ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
+  auto p      = 0;
   for (p = 0; p < p_max; ++p) {
     if (u[0][0] < ap_pdf[p]) break;
     u[0][0] -= ap_pdf[p];
   }
 
   // Rotate $\sin \thetao$ and $\cos \thetao$ to account for hair scale tilt
-  float sin_theta_op, cos_theta_op;
+  auto sin_theta_op = 0.0f;
+  auto cos_theta_op = 0.0f;
   if (p == 0) {
     sin_theta_op = sin_theta_o * cos_2k_alpha[1] -
                    cos_theta_o * sin_2k_alpha[1];
@@ -441,21 +442,21 @@ vec3f sample_hair_scattering(
   }
 
   // Sample $M_p$ to compute $\thetai$
-  u[1][0]           = max(u[1][0], 1e-5f);
-  float cos_theta   = 1 + v[p] * log(u[1][0] + (1 - u[1][0]) * exp(-2 / v[p]));
-  float sin_theta   = safe_sqrt(1 - sqr(cos_theta));
-  float cos_phi     = cos(2 * pif * u[1][1]);
-  float sin_theta_i = -cos_theta * sin_theta_op +
-                      sin_theta * cos_phi * cos_theta_op;
-  float cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
+  u[1][0]          = max(u[1][0], 1e-5f);
+  auto cos_theta   = 1 + v[p] * log(u[1][0] + (1 - u[1][0]) * exp(-2 / v[p]));
+  auto sin_theta   = safe_sqrt(1 - sqr(cos_theta));
+  auto cos_phi     = cos(2 * pif * u[1][1]);
+  auto sin_theta_i = -cos_theta * sin_theta_op +
+                     sin_theta * cos_phi * cos_theta_op;
+  auto cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
 
   // Sample $N_p$ to compute $\Delta\phi$
 
   // Compute $\gammat$ for refracted ray
-  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
-  float sin_gamma_t = h / etap;
-  float gamma_t     = safe_asin(sin_gamma_t);
-  float dphi;
+  auto etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
+  auto sin_gamma_t = h / etap;
+  auto gamma_t     = safe_asin(sin_gamma_t);
+  auto dphi        = 0.0f;
   if (p < p_max)
     dphi = phi(p, gamma_o, gamma_t) +
            sample_trimmed_logistic(u[0][1], s, -pif, pif);
@@ -463,7 +464,7 @@ vec3f sample_hair_scattering(
     dphi = 2 * pif * u[0][1];
 
   // Compute _wi_ from sampled hair scattering angles
-  float phi_i = phi_o + dphi;
+  auto phi_i = phi_o + dphi;
 
   auto incoming = vec3f{
       sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
