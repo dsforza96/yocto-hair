@@ -148,14 +148,14 @@ hair_brdf eval_hair_brdf(const hair_material& material, float v,
       0.726f * beta_m + 0.812f * sqr(beta_m) + 3.7f * pow<20>(beta_m));
   brdf.v[1] = 0.25 * brdf.v[0];
   brdf.v[2] = 4 * brdf.v[0];
-  for (int p = 3; p <= p_max; ++p) brdf.v[p] = brdf.v[2];
+  for (auto p = 3; p <= p_max; ++p) brdf.v[p] = brdf.v[2];
 
   brdf.s = sqrt_pi_over_8f *
            (0.265f * beta_n + 1.194f * sqr(beta_n) + 5.372f * pow<22>(beta_n));
 
   brdf.sin_2k_alpha[0] = sin(pif / 180 * brdf.alpha);
   brdf.cos_2k_alpha[0] = safe_sqrt(1 - sqr(brdf.sin_2k_alpha[0]));
-  for (int i = 1; i < 3; ++i) {
+  for (auto i = 1; i < 3; ++i) {
     brdf.sin_2k_alpha[i] = 2 * brdf.cos_2k_alpha[i - 1] *
                            brdf.sin_2k_alpha[i - 1];
     brdf.cos_2k_alpha[i] = sqr(brdf.cos_2k_alpha[i - 1]) -
@@ -191,31 +191,29 @@ inline float log_i0(float x) {
 
 static float mp(float cos_theta_i, float cos_theta_o, float sin_theta_i,
     float sin_theta_o, float v) {
-  float a  = cos_theta_i * cos_theta_o / v;
-  float b  = sin_theta_i * sin_theta_o / v;
-  float mp = (v <= 0.1)
-                 ? (exp(log_i0(a) - b - 1 / v + 0.6931f + log(1 / (2 * v))))
-                 : (exp(-b) * i0(a)) / (sinh(1 / v) * 2 * v);
-  return mp;
+  auto a = cos_theta_i * cos_theta_o / v;
+  auto b = sin_theta_i * sin_theta_o / v;
+  return (v <= 0.1) ? (exp(log_i0(a) - b - 1 / v + 0.6931f + log(1 / (2 * v))))
+                    : (exp(-b) * i0(a)) / (sinh(1 / v) * 2 * v);
 }
 
 static std::array<vec3f, p_max + 1> ap(
     float cos_theta_o, float eta, float h, const vec3f& T) {
   std::array<vec3f, p_max + 1> ap;
   // Compute $p=0$ attenuation at initial cylinder intersection
-  float cos_gamma_o = safe_sqrt(1 - h * h);
-  float cos_theta   = cos_theta_o * cos_gamma_o;
+  auto cos_gamma_o = safe_sqrt(1 - h * h);
+  auto cos_theta   = cos_theta_o * cos_gamma_o;
 
   // fresnel_dielectric(eta, cos_theta): we hack function's parameters bulding
   // two vector s.T. their dot product give exactly cos_theta
-  float f = fresnel_dielectric(eta, {1, 0, 0}, {cos_theta, 0, 0});
-  ap[0]   = vec3f(f);
+  auto f = fresnel_dielectric(eta, {1, 0, 0}, {cos_theta, 0, 0});
+  ap[0]  = vec3f(f);
 
   // Compute $p=1$ attenuation term
   ap[1] = sqr(1 - f) * T;
 
   // Compute attenuation terms up to $p=_pMax_$
-  for (int p = 2; p < p_max; ++p) ap[p] = ap[p - 1] * T * f;
+  for (auto p = 2; p < p_max; ++p) ap[p] = ap[p - 1] * T * f;
 
   // Compute attenuation term accounting for remaining orders of scattering
   ap[p_max] = ap[p_max - 1] * f * T / (vec3f(1.f) - T * f);
@@ -238,7 +236,7 @@ inline float trimmed_logistic(float x, float s, float a, float b) {
 }
 
 inline float np(float phi, int p, float s, float gamma_o, float gamma_t) {
-  float dphi = phi - ext::phi(p, gamma_o, gamma_t);
+  auto dphi = phi - ext::phi(p, gamma_o, gamma_t);
   // Remap _dphi_ to $[-\pi,\pi]$
   while (dphi > pif) dphi -= 2 * pif;
   while (dphi < -pif) dphi += 2 * pif;
@@ -261,34 +259,35 @@ vec3f eval_hair_scattering(
   auto incoming = transform_direction(world_to_brdf, incoming_);
 
   // Compute hair coordinate system terms related to _wo_
-  float sin_theta_o = outgoing.x;
-  float cos_theta_o = safe_sqrt(1 - sqr(sin_theta_o));
-  float phi_o       = atan2(outgoing.z, outgoing.y);
+  auto sin_theta_o = outgoing.x;
+  auto cos_theta_o = safe_sqrt(1 - sqr(sin_theta_o));
+  auto phi_o       = atan2(outgoing.z, outgoing.y);
 
   // Compute hair coordinate system terms related to _wi_
-  float sin_theta_i = incoming.x;
-  float cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
-  float phi_i       = atan2(incoming.z, incoming.y);
+  auto sin_theta_i = incoming.x;
+  auto cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
+  auto phi_i       = atan2(incoming.z, incoming.y);
 
   // Compute $\cos \thetat$ for refracted ray
-  float sin_theta_t = sin_theta_o / eta;
-  float cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
+  auto sin_theta_t = sin_theta_o / eta;
+  auto cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
 
-  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
-  float sin_gamma_t = h / etap;
-  float cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
-  float gamma_t     = safe_asin(sin_gamma_t);
+  auto etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
+  auto sin_gamma_t = h / etap;
+  auto cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
+  auto gamma_t     = safe_asin(sin_gamma_t);
 
   // Compute the transmittance _T_ of a single path through the cylinder
-  vec3f T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
+  auto T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
 
   // Evaluate hair BSDF
-  float                        phi  = phi_i - phi_o;
-  std::array<vec3f, p_max + 1> ap   = ext::ap(cos_theta_o, eta, h, T);
-  vec3f                        fsum = zero3f;
-  for (int p = 0; p < p_max; ++p) {
+  auto phi  = phi_i - phi_o;
+  auto ap   = ext::ap(cos_theta_o, eta, h, T);
+  auto fsum = zero3f;
+  for (auto p = 0; p < p_max; ++p) {
     // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
-    float sin_theta_op, cos_theta_op;
+    auto sin_theta_op = 0.0f;
+    auto cos_theta_op = 0.0f;
     if (p == 0) {
       sin_theta_op = sin_theta_o * cos_2k_alpha[1] -
                      cos_theta_o * sin_2k_alpha[1];
@@ -320,7 +319,7 @@ vec3f eval_hair_scattering(
 
   // Compute contribution of remaining terms after _pMax_
   fsum += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
-          ap[p_max] / (2.0f * pif);
+          ap[p_max] / (2 * pif);
 
   // if (abs(incoming.z) > 0)
   //   fsum /= abs(incoming.z);
@@ -351,8 +350,8 @@ static vec2f demux_float(float f) {
 }
 
 static float sample_trimmed_logistic(float u, float s, float a, float b) {
-  float k = logistic_cdf(b, s) - logistic_cdf(a, s);
-  float x = -s * log(1 / (u * k + logistic_cdf(a, s)) - 1);
+  auto k = logistic_cdf(b, s) - logistic_cdf(a, s);
+  auto x = -s * log(1 / (u * k + logistic_cdf(a, s)) - 1);
   return clamp(x, a, b);
 }
 
