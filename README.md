@@ -8,7 +8,7 @@ Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 ![](images/hair_curls_1280_4096.png)
 
 ## Geometry
-We decided to test our implementation using hair models from [Benedikt Bitterli Rendering Resources](https://benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scene format.
+We tested our implementation using hair models from Benedikt Bitterli's [Rendering Resources](https://benedikt-bitterli.me/resources). We converted *.pbrt* scenes into Yocto/GL *.json* scene format.
 Because Yocto/GL does not support Bézier curves, we approximated them with straight lines. We used two and four lines for each Bézier curve to render straight and curly hairs, respectively. We also stored curves tangents and linear interpolated widths for each vertex. To optimize rendering performances, we joined all the lines belonging to the same model into one only *.ply* shape.
 
 All converted models can be downloaded [here](https://drive.google.com/drive/folders/1dxACwl7tILq09_3m-KPaIRDEbdolVmo2?usp=sharing).
@@ -17,7 +17,7 @@ All converted models can be downloaded [here](https://drive.google.com/drive/fol
 Our implementation follows straightforwardly the one presented in the pbrt chapter. To respect the Yocto/GL convention, we implemented three new functions:
 - `eval_hair_scattering(...)`: evaluates hair BRDF lobes according to the input incoming and outgoing directions. As for the other functions which evaluate BRDF lobes, we folded the product by the cosine between the incoming direction and the shading normal inside this function;
 - `sample_hair_scattering(...)`: given an outgoing direction, samples an incoming direction according to the hair BRDF;
-- `eval_hair_scattering_pdf(...)`: returns the PDF for hair BRDF lobes sampling related to the given incoming and outgoing directions.
+- `eval_hair_scattering_pdf(...)`: returns the PDF for hair BRDF sampling related to the given incoming and outgoing directions.
 
 The function `eval_hair_brdf(...)` is responsible to evaluate the input hair material together with the *v* coordinate of the ray-line intersection and to return the corresponding hair BRDF lobes. Since pbrt computations are made in the BRDF coordinate system, we built a frame to convert from world to local BRDF coordinate systems and vice versa. The *z* axis of this frame is orientend along the shading normal, while the *x* axis is orientend along the line tangent.
 
@@ -50,7 +50,7 @@ In the first image `sigma_a` is set to `{3.35, 5.58, 10.96}` (corresponding to b
 ### Azimuthal Scattering
 <img src="images/azimuthal_03_720_1536.png" width="300"/> <img src="images/azimuthal_06_720_1536.png" width="300"/> <img src="images/azimuthal_09_720_1536.png" width="300"/>
 
-The first image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the longitudinal roughness increases, hairs get brighter.
+The first image is rendered with `beta_n = 0.3`, the second one with `beta_n = 0.6` and the third one with `beta_n = 0.9`. As the azimuthal roughness increases, hair get brighter.
 
 ### Scales on Hair Surface
 <p align="center"> <img src="images/alpha_0_720_1536.png" width="300"/> <img src="images/alpha_2_720_1536.png" width="300"/> </p>
