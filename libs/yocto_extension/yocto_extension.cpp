@@ -362,28 +362,28 @@ static std::array<float, p_max + 1> compute_ap_pdf(
   auto h       = brdf.h;
 
   // Compute array of $A_p$ values for _cosThetaO_
-  float sin_theta_o = safe_sqrt(1 - cos_theta_o * cos_theta_o);
+  auto sin_theta_o = safe_sqrt(1 - cos_theta_o * cos_theta_o);
 
   // Compute $\cos \thetat$ for refracted ray
-  float sin_theta_t = sin_theta_o / eta;
-  float cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
+  auto sin_theta_t = sin_theta_o / eta;
+  auto cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
 
   // Compute $\gammat$ for refracted ray
-  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
-  float sin_gamma_t = h / etap;
-  float cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
+  auto etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
+  auto sin_gamma_t = h / etap;
+  auto cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
 
   // Compute the transmittance _T_ of a single path through the cylinder
-  vec3f T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
-  std::array<vec3f, p_max + 1> ap = ext::ap(cos_theta_o, eta, h, T);
+  auto T  = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
+  auto ap = ext::ap(cos_theta_o, eta, h, T);
 
   // Compute $A_p$ PDF from individual $A_p$ terms
-  std::array<float, p_max + 1> ap_pdf;
-  float                        sum_y = 0;
-  for (int i = 0; i <= p_max; ++i) {
+  auto ap_pdf = std::array<float, p_max + 1>{};
+  auto sum_y  = 0.0f;
+  for (auto i = 0; i <= p_max; ++i) {
     sum_y += math::luminance(ap[i]);
   }
-  for (int i = 0; i <= p_max; ++i) {
+  for (auto i = 0; i <= p_max; ++i) {
     ap_pdf[i] = math::luminance(ap[i]) / sum_y;
   }
   return ap_pdf;
