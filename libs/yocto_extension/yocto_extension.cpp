@@ -150,15 +150,18 @@ hair_brdf eval_hair_brdf(const hair_material& material, float v,
 
   brdf.gamma_o = safe_asin(brdf.h);
 
+  // Compute longitudinal variance from $\beta_m$
   brdf.v[0] = sqr(
       0.726f * beta_m + 0.812f * sqr(beta_m) + 3.7f * pow<20>(beta_m));
   brdf.v[1] = 0.25f * brdf.v[0];
   brdf.v[2] = 4 * brdf.v[0];
   for (auto p = 3; p <= p_max; ++p) brdf.v[p] = brdf.v[2];
 
+  // Compute azimuthal logistic scale factor from $\beta_n$
   brdf.s = sqrt_pi_over_8f *
            (0.265f * beta_n + 1.194f * sqr(beta_n) + 5.372f * pow<22>(beta_n));
 
+  // Compute $\alpha$ terms for hair scales
   brdf.sin_2k_alpha[0] = sin(pif / 180 * brdf.alpha);
   brdf.cos_2k_alpha[0] = safe_sqrt(1 - sqr(brdf.sin_2k_alpha[0]));
   for (auto i = 1; i < 3; ++i) {
@@ -199,8 +202,8 @@ static float mp(float cos_theta_i, float cos_theta_o, float sin_theta_i,
     float sin_theta_o, float v) {
   auto a = cos_theta_i * cos_theta_o / v;
   auto b = sin_theta_i * sin_theta_o / v;
-  return (v <= 0.1) ? (exp(log_i0(a) - b - 1 / v + 0.6931f + log(1 / (2 * v))))
-                    : (exp(-b) * i0(a)) / (sinh(1 / v) * 2 * v);
+  return (v <= 0.1f) ? (exp(log_i0(a) - b - 1 / v + 0.6931f + log(1 / (2 * v))))
+                     : (exp(-b) * i0(a)) / (sinh(1 / v) * 2 * v);
 }
 
 static std::array<vec3f, p_max + 1> ap(
@@ -278,6 +281,7 @@ vec3f eval_hair_scattering(
   auto sin_theta_t = sin_theta_o / eta;
   auto cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
 
+  // Compute $\gammat$ for refracted ray
   auto etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
   auto sin_gamma_t = h / etap;
   auto cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
@@ -396,7 +400,7 @@ static std::array<float, p_max + 1> compute_ap_pdf(
 }
 
 vec3f sample_hair_scattering(
-    const hair_brdf& brdf, const vec3f& outgoing_, const vec2f& u2) {
+    const hair_brdf& brdf, const vec3f& outgoing_, const vec2f& rn) {
   auto eta           = brdf.eta;
   auto h             = brdf.h;
   auto gamma_o       = brdf.gamma_o;
@@ -414,7 +418,7 @@ vec3f sample_hair_scattering(
   auto phi_o       = atan2(outgoing.z, outgoing.y);
 
   // Derive four random samples from _u2_
-  auto u = std::array{demux_float(u2[0]), demux_float(u2[1])};
+  auto u = std::array{demux_float(rn.x), demux_float(rn.y)};
 
   // Determine which term $p$ to sample for hair scattering
   auto ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
@@ -501,6 +505,7 @@ float sample_hair_scattering_pdf(
   auto cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
   auto phi_i       = atan2(incoming.z, incoming.y);
 
+  // Compute $\gammat$ for refracted ray
   auto etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
   auto sin_gamma_t = h / etap;
   auto gamma_t     = safe_asin(sin_gamma_t);
@@ -564,18 +569,15 @@ void white_furnace_test() {
 #else
         auto h = rand1f(rng);
 #endif
-        // The original pbrt test fails with h = 0
+        // the original pbrt test fails with h = 0
         if (h == 0) h += flt_eps;
 
         auto mat   = hair_material{};
         mat.beta_m = beta_m;
         mat.beta_n = beta_n;
         mat.alpha  = 0;
-
-        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
-
-        auto wi = sample_sphere(rand2f(rng));
-
+        auto brdf  = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto wi    = sample_sphere(rand2f(rng));
         sum += eval_hair_scattering(brdf, wo, wi);
       }
       auto avg = luminance(sum) / (count * sample_sphere_pdf(wo));
@@ -592,7 +594,6 @@ void white_furnace_sampled_test() {
   auto wo  = sample_sphere(rand2f(rng));
   for (auto beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.2f) {
     for (auto beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.2f) {
-      // Estimate reflected uniform incident radiance from hair
       auto sum   = zero3f;
       auto count = 300000;
       for (auto i = 0; i < count; ++i) {
@@ -605,13 +606,10 @@ void white_furnace_sampled_test() {
         mat.beta_m = beta_m;
         mat.beta_n = beta_n;
         mat.alpha  = 0;
-
-        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
-
-        auto wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
-        auto pdf = sample_hair_scattering_pdf(brdf, wo, wi);
-        auto f   = eval_hair_scattering(brdf, wo, wi);
-        // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
+        auto brdf  = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto wi    = sample_hair_scattering(brdf, wo, rand2f(rng));
+        auto pdf   = sample_hair_scattering_pdf(brdf, wo, wi);
+        auto f     = eval_hair_scattering(brdf, wo, wi);
         if (pdf > 0) sum += f / pdf;
       }
       auto avg = luminance(sum) / (count);
@@ -625,12 +623,11 @@ void white_furnace_sampled_test() {
 
 void sampling_weights_test() {
   auto rng = make_rng(199382389514);
-
   for (auto beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.2f) {
     for (auto beta_n = 0.4f; beta_n < 1.0f; beta_n += 0.2f) {
-      // Estimate reflected uniform incident radiance from hair
       auto count = 10000;
       for (auto i = 0; i < count; ++i) {
+        // Check _HairBSDF::Sample\_f()_ sample weight
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
 #else
@@ -640,18 +637,14 @@ void sampling_weights_test() {
         mat.beta_m = beta_m;
         mat.beta_n = beta_n;
         mat.alpha  = 0;
-
-        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
-
-        auto wo = sample_sphere(rand2f(rng));
-
-        auto wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
-        auto pdf = sample_hair_scattering_pdf(brdf, wo, wi);
-        auto f   = eval_hair_scattering(brdf, wo, wi);
-        // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
+        auto brdf  = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto wo    = sample_sphere(rand2f(rng));
+        auto wi    = sample_hair_scattering(brdf, wo, rand2f(rng));
+        auto pdf   = sample_hair_scattering_pdf(brdf, wo, wi);
+        auto f     = eval_hair_scattering(brdf, wo, wi);
         if (pdf > 0) {
-          if (!(luminance(f) / pdf >= 0.999f &&
-                  luminance(f) * abs(wi.z) / pdf <= 1.001f))
+          // Verify that hair BSDF sample weight is close to 1 for _wi_
+          if (!(luminance(f) / pdf >= 0.999f && luminance(f) / pdf <= 1.001f))
             throw std::runtime_error("TEST FAILED!");
         }
       }
@@ -672,8 +665,7 @@ void sampling_consistency_test() {
       auto       li = [](const vec3f& w) -> vec3f { return vec3f(w.z * w.z); };
       auto       f_importance = vec3f(0), f_uniform = vec3f(0);
       for (auto i = 0; i < count; ++i) {
-        // Compute estimates of scattered radiance for hair sampling
-        // test
+        // Compute estimates of scattered radiance for hair sampling test
 #ifdef YOCTO_EMBREE
         auto h = -1 + 2 * rand1f(rng);
 #else
@@ -683,12 +675,11 @@ void sampling_consistency_test() {
         mat.beta_m = beta_m;
         mat.beta_n = beta_n;
         mat.alpha  = 0;
-
-        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
-        auto u    = rand2f(rng);
-        auto wi   = sample_hair_scattering(brdf, wo, u);
-        auto pdf  = sample_hair_scattering_pdf(brdf, wo, wi);
-        auto f    = eval_hair_scattering(brdf, wo, wi);
+        auto brdf  = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto u     = rand2f(rng);
+        auto wi    = sample_hair_scattering(brdf, wo, u);
+        auto pdf   = sample_hair_scattering_pdf(brdf, wo, wi);
+        auto f     = eval_hair_scattering(brdf, wo, wi);
         if (pdf > 0) f_importance += f * li(wi) / (count * pdf);
         wi = sample_sphere(u);
         f_uniform += eval_hair_scattering(brdf, wo, wi) * li(wi) /
@@ -697,7 +688,6 @@ void sampling_consistency_test() {
       // Verify consistency of estimated hair reflected radiance values
       auto err = abs(luminance(f_importance) - luminance(f_uniform)) /
                  luminance(f_uniform);
-      // EXPECT_LT(err, 0.05);
       if (err >= 0.05f) throw std::runtime_error("TEST FAILED!");
     }
   printf("OK!\n");
