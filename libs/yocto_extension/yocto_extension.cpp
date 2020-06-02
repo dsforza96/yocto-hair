@@ -208,13 +208,12 @@ static float mp(float cos_theta_i, float cos_theta_o, float sin_theta_i,
 
 static std::array<vec3f, p_max + 1> ap(
     float cos_theta_o, float eta, float h, const vec3f& T) {
-  std::array<vec3f, p_max + 1> ap;
+  auto ap = std::array<vec3f, p_max + 1>{};
   // Compute $p=0$ attenuation at initial cylinder intersection
   auto cos_gamma_o = safe_sqrt(1 - h * h);
   auto cos_theta   = cos_theta_o * cos_gamma_o;
-
   // fresnel_dielectric(eta, cos_theta): we hack function's parameters bulding
-  // two vector s.t. their dot product gives exactly cos_theta
+  // two vectors s.t. their dot product gives exactly cos_theta
   auto f = fresnel_dielectric(eta, {0, 0, 1}, {0, 0, cos_theta});
   ap[0]  = vec3f(f);
 
@@ -418,7 +417,7 @@ vec3f sample_hair_scattering(
   auto phi_o       = atan2(outgoing.z, outgoing.y);
 
   // Derive four random samples from _u2_
-  auto u = std::array{demux_float(rn.x), demux_float(rn.y)};
+  auto u = std::array<vec2f, 2>{demux_float(rn.x), demux_float(rn.y)};
 
   // Determine which term $p$ to sample for hair scattering
   auto ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
