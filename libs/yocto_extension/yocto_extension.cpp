@@ -105,21 +105,6 @@ inline float safe_asin(float x) { return asin(clamp(x, -1.0f, 1.0f)); }
 
 inline float safe_sqrt(float x) { return sqrt(max(0.0f, x)); }
 
-inline float i0(float x) {
-  float   val   = 0;
-  float   x2i   = 1;
-  int64_t ifact = 1;
-  int     i4    = 1;
-  // I0(x) \approx Sum_i x^(2i) / (4^i (i!)^2)
-  for (int i = 0; i < 10; ++i) {
-    if (i > 1) ifact *= i;
-    val += x2i / (i4 * ifact * ifact);
-    x2i *= x * x;
-    i4 *= 4;
-  }
-  return val;
-}
-
 static vec3f sigma_a_from_concentration(float ce, float cp) {
   vec3f sigma_a;
   vec3f eumelanin_sigma_a   = {0.419f, 0.697f, 1.37f};
@@ -187,26 +172,26 @@ hair_brdf eval_hair_brdf(const hair_material& material, float v,
   return brdf;
 }
 
+inline float i0(float x) {
+  float   val   = 0;
+  float   x2i   = 1;
+  int64_t ifact = 1;
+  int     i4    = 1;
+  // I0(x) \approx Sum_i x^(2i) / (4^i (i!)^2)
+  for (int i = 0; i < 10; ++i) {
+    if (i > 1) ifact *= i;
+    val += x2i / (i4 * ifact * ifact);
+    x2i *= x * x;
+    i4 *= 4;
+  }
+  return val;
+}
+
 inline float log_i0(float x) {
   if (x > 12)
     return x + 0.5 * (-log(2 * pif) + log(1 / x) + 1 / (8 * x));
   else
     return log(i0(x));
-}
-
-inline float phi(int p, float gamma_o, float gamma_t) {
-  return 2 * p * gamma_t - 2 * gamma_o + p * pif;
-}
-
-inline float logistic(float x, float s) {
-  x = abs(x);
-  return exp(-x / s) / (s * sqr(1 + exp(-x / s)));
-}
-
-inline float logistic_cdf(float x, float s) { return 1 / (1 + exp(-x / s)); }
-
-inline float trimmed_logistic(float x, float s, float a, float b) {
-  return logistic(x, s) / (logistic_cdf(b, s) - logistic_cdf(a, s));
 }
 
 static float mp(float cos_theta_i, float cos_theta_o, float sin_theta_i,
@@ -242,8 +227,23 @@ static std::array<vec3f, p_max + 1> ap(
   return ap;
 }
 
+inline float phi(int p, float gamma_o, float gamma_t) {
+  return 2 * p * gamma_t - 2 * gamma_o + p * pif;
+}
+
+inline float logistic(float x, float s) {
+  x = abs(x);
+  return exp(-x / s) / (s * sqr(1 + exp(-x / s)));
+}
+
+inline float logistic_cdf(float x, float s) { return 1 / (1 + exp(-x / s)); }
+
+inline float trimmed_logistic(float x, float s, float a, float b) {
+  return logistic(x, s) / (logistic_cdf(b, s) - logistic_cdf(a, s));
+}
+
 inline float np(float phi, int p, float s, float gamma_o, float gamma_t) {
-  float dphi = phi - extension::phi(p, gamma_o, gamma_t);
+  float dphi = phi - ext::phi(p, gamma_o, gamma_t);
   // Remap _dphi_ to $[-\pi,\pi]$
   while (dphi > pif) dphi -= 2 * pif;
   while (dphi < -pif) dphi += 2 * pif;
@@ -289,7 +289,7 @@ vec3f eval_hair_scattering(
 
   // Evaluate hair BSDF
   float                        phi  = phi_i - phi_o;
-  std::array<vec3f, p_max + 1> ap   = extension::ap(cos_theta_o, eta, h, T);
+  std::array<vec3f, p_max + 1> ap   = ext::ap(cos_theta_o, eta, h, T);
   vec3f                        fsum = zero3f;
   for (int p = 0; p < p_max; ++p) {
     // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
@@ -334,110 +334,6 @@ vec3f eval_hair_scattering(
   return fsum;
 }
 
-static std::array<float, p_max + 1> compute_ap_pdf(
-    const hair_brdf& brdf, float cos_theta_o) {
-  auto sigma_a = brdf.sigma_a;
-  auto eta     = brdf.eta;
-  auto h       = brdf.h;
-
-  // Compute array of $A_p$ values for _cosThetaO_
-  float sin_theta_o = safe_sqrt(1 - cos_theta_o * cos_theta_o);
-
-  // Compute $\cos \thetat$ for refracted ray
-  float sin_theta_t = sin_theta_o / eta;
-  float cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
-
-  // Compute $\gammat$ for refracted ray
-  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
-  float sin_gamma_t = h / etap;
-  float cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
-
-  // Compute the transmittance _T_ of a single path through the cylinder
-  vec3f T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
-  std::array<vec3f, p_max + 1> ap = extension::ap(cos_theta_o, eta, h, T);
-
-  // Compute $A_p$ PDF from individual $A_p$ terms
-  std::array<float, p_max + 1> ap_pdf;
-  float                        sum_y = 0;
-  for (int i = 0; i <= p_max; ++i) {
-    sum_y += math::luminance(ap[i]);
-  }
-  for (int i = 0; i <= p_max; ++i) {
-    ap_pdf[i] = math::luminance(ap[i]) / sum_y;
-  }
-  return ap_pdf;
-}
-
-float sample_hair_scattering_pdf(
-    const hair_brdf& brdf, const vec3f& outgoing_, const vec3f& incoming_) {
-  auto eta           = brdf.eta;
-  auto h             = brdf.h;
-  auto gamma_o       = brdf.gamma_o;
-  auto v             = brdf.v;
-  auto s             = brdf.s;
-  auto sin_2k_alpha  = brdf.sin_2k_alpha;
-  auto cos_2k_alpha  = brdf.cos_2k_alpha;
-  auto world_to_brdf = brdf.world_to_brdf;
-
-  auto outgoing = transform_direction(world_to_brdf, outgoing_);
-  auto incoming = transform_direction(world_to_brdf, incoming_);
-
-  // Compute hair coordinate system terms related to _wo_
-  float sin_theta_o = outgoing.x;
-  float cos_theta_o = safe_sqrt(1 - sqr(sin_theta_o));
-  float phi_o       = atan2(outgoing.z, outgoing.y);
-
-  // Compute hair coordinate system terms related to _wi_
-  float sin_theta_i = incoming.x;
-  float cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
-  float phi_i       = atan2(incoming.z, incoming.y);
-
-  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
-  float sin_gamma_t = h / etap;
-  float gamma_t     = safe_asin(sin_gamma_t);
-
-  // Compute PDF for $A_p$ terms
-  std::array<float, p_max + 1> ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
-
-  // Compute PDF sum for hair scattering events
-  float phi = phi_i - phi_o;
-  float pdf = 0;
-  for (int p = 0; p < p_max; ++p) {
-    // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
-    float sin_theta_op, cos_theta_op;
-    if (p == 0) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[1] -
-                     cos_theta_o * sin_2k_alpha[1];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[1] +
-                     sin_theta_o * sin_2k_alpha[1];
-    }
-
-    // Handle remainder of $p$ values for hair scale tilt
-    else if (p == 1) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[0] +
-                     cos_theta_o * sin_2k_alpha[0];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[0] -
-                     sin_theta_o * sin_2k_alpha[0];
-    } else if (p == 2) {
-      sin_theta_op = sin_theta_o * cos_2k_alpha[2] +
-                     cos_theta_o * sin_2k_alpha[2];
-      cos_theta_op = cos_theta_o * cos_2k_alpha[2] -
-                     sin_theta_o * sin_2k_alpha[2];
-    } else {
-      sin_theta_op = sin_theta_o;
-      cos_theta_op = cos_theta_o;
-    }
-
-    // Handle out-of-range $\cos \thetao$ from scale adjustment
-    cos_theta_op = abs(cos_theta_op);
-    pdf += mp(cos_theta_i, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) *
-           ap_pdf[p] * np(phi, p, s, gamma_o, gamma_t);
-  }
-  pdf += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
-         ap_pdf[p_max] * (1 / (2 * pif));
-  return pdf;
-}
-
 // https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
 static uint32_t compact1by1(uint32_t x) {
   // x = -f-e -d-c -b-a -9-8 -7-6 -5-4 -3-2 -1-0
@@ -463,6 +359,40 @@ static float sample_trimmed_logistic(float u, float s, float a, float b) {
   float k = logistic_cdf(b, s) - logistic_cdf(a, s);
   float x = -s * log(1 / (u * k + logistic_cdf(a, s)) - 1);
   return clamp(x, a, b);
+}
+
+static std::array<float, p_max + 1> compute_ap_pdf(
+    const hair_brdf& brdf, float cos_theta_o) {
+  auto sigma_a = brdf.sigma_a;
+  auto eta     = brdf.eta;
+  auto h       = brdf.h;
+
+  // Compute array of $A_p$ values for _cosThetaO_
+  float sin_theta_o = safe_sqrt(1 - cos_theta_o * cos_theta_o);
+
+  // Compute $\cos \thetat$ for refracted ray
+  float sin_theta_t = sin_theta_o / eta;
+  float cos_theta_t = safe_sqrt(1 - sqr(sin_theta_t));
+
+  // Compute $\gammat$ for refracted ray
+  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
+  float sin_gamma_t = h / etap;
+  float cos_gamma_t = safe_sqrt(1 - sqr(sin_gamma_t));
+
+  // Compute the transmittance _T_ of a single path through the cylinder
+  vec3f T = exp(-sigma_a * (2 * cos_gamma_t / cos_theta_t));
+  std::array<vec3f, p_max + 1> ap = ext::ap(cos_theta_o, eta, h, T);
+
+  // Compute $A_p$ PDF from individual $A_p$ terms
+  std::array<float, p_max + 1> ap_pdf;
+  float                        sum_y = 0;
+  for (int i = 0; i <= p_max; ++i) {
+    sum_y += math::luminance(ap[i]);
+  }
+  for (int i = 0; i <= p_max; ++i) {
+    ap_pdf[i] = math::luminance(ap[i]) / sum_y;
+  }
+  return ap_pdf;
 }
 
 vec3f sample_hair_scattering(
@@ -544,6 +474,76 @@ vec3f sample_hair_scattering(
   auto incoming = vec3f{
       sin_theta_i, cos_theta_i * cos(phi_i), cos_theta_i * sin(phi_i)};
   return transform_direction(inverse(world_to_brdf), incoming);
+}
+
+float sample_hair_scattering_pdf(
+    const hair_brdf& brdf, const vec3f& outgoing_, const vec3f& incoming_) {
+  auto eta           = brdf.eta;
+  auto h             = brdf.h;
+  auto gamma_o       = brdf.gamma_o;
+  auto v             = brdf.v;
+  auto s             = brdf.s;
+  auto sin_2k_alpha  = brdf.sin_2k_alpha;
+  auto cos_2k_alpha  = brdf.cos_2k_alpha;
+  auto world_to_brdf = brdf.world_to_brdf;
+
+  auto outgoing = transform_direction(world_to_brdf, outgoing_);
+  auto incoming = transform_direction(world_to_brdf, incoming_);
+
+  // Compute hair coordinate system terms related to _wo_
+  float sin_theta_o = outgoing.x;
+  float cos_theta_o = safe_sqrt(1 - sqr(sin_theta_o));
+  float phi_o       = atan2(outgoing.z, outgoing.y);
+
+  // Compute hair coordinate system terms related to _wi_
+  float sin_theta_i = incoming.x;
+  float cos_theta_i = safe_sqrt(1 - sqr(sin_theta_i));
+  float phi_i       = atan2(incoming.z, incoming.y);
+
+  float etap        = sqrt(eta * eta - sqr(sin_theta_o)) / cos_theta_o;
+  float sin_gamma_t = h / etap;
+  float gamma_t     = safe_asin(sin_gamma_t);
+
+  // Compute PDF for $A_p$ terms
+  std::array<float, p_max + 1> ap_pdf = compute_ap_pdf(brdf, cos_theta_o);
+
+  // Compute PDF sum for hair scattering events
+  float phi = phi_i - phi_o;
+  float pdf = 0;
+  for (int p = 0; p < p_max; ++p) {
+    // Compute $\sin \thetao$ and $\cos \thetao$ terms accounting for scales
+    float sin_theta_op, cos_theta_op;
+    if (p == 0) {
+      sin_theta_op = sin_theta_o * cos_2k_alpha[1] -
+                     cos_theta_o * sin_2k_alpha[1];
+      cos_theta_op = cos_theta_o * cos_2k_alpha[1] +
+                     sin_theta_o * sin_2k_alpha[1];
+    }
+
+    // Handle remainder of $p$ values for hair scale tilt
+    else if (p == 1) {
+      sin_theta_op = sin_theta_o * cos_2k_alpha[0] +
+                     cos_theta_o * sin_2k_alpha[0];
+      cos_theta_op = cos_theta_o * cos_2k_alpha[0] -
+                     sin_theta_o * sin_2k_alpha[0];
+    } else if (p == 2) {
+      sin_theta_op = sin_theta_o * cos_2k_alpha[2] +
+                     cos_theta_o * sin_2k_alpha[2];
+      cos_theta_op = cos_theta_o * cos_2k_alpha[2] -
+                     sin_theta_o * sin_2k_alpha[2];
+    } else {
+      sin_theta_op = sin_theta_o;
+      cos_theta_op = cos_theta_o;
+    }
+
+    // Handle out-of-range $\cos \thetao$ from scale adjustment
+    cos_theta_op = abs(cos_theta_op);
+    pdf += mp(cos_theta_i, cos_theta_op, sin_theta_i, sin_theta_op, v[p]) *
+           ap_pdf[p] * np(phi, p, s, gamma_o, gamma_t);
+  }
+  pdf += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
+         ap_pdf[p_max] * (1 / (2 * pif));
+  return pdf;
 }
 
 // HAIR SCATTERING TESTS

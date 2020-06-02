@@ -109,7 +109,7 @@ struct hair_brdf {
 
   // Allow to convert outgoing and incoming directions to BRDF coordinate
   // system
-  frame3f world_to_brdf = math::identity3x4f;
+  frame3f world_to_brdf = identity3x4f;
 };
 
 hair_brdf eval_hair_brdf(const hair_material& material, float v,
