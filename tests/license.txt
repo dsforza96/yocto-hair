@@ -1,10 +1,10 @@
 License for model files.
 
-1. straight-hair:
+1. straight-hair
     - model by Cem Yuksel
     - license: http://www.cemyuksel.com/research/hairmodels/
     - downloaded from Benedikt Bitterli's Rendering Resources: https://benedikt-bitterli.me/resources/
-2. curly-hair:
+2. curly-hair
     - model by Cem Yuksel
     - license: http://www.cemyuksel.com/research/hairmodels/
     - downloaded from Benedikt Bitterli's Rendering Resources: https://benedikt-bitterli.me/resources/
@@ -15,5 +15,5 @@ License for model files.
 4. hair-block
     - downloaded from Scenes for pbrt-v3: https://www.pbrt.org/scenes-v3.html
 5. bold-man
-    - license included in file bold-man/license.txt
+    - license in file bold-man/license.txt
     - downloaded from 3DScanStore: https://www.3dscanstore.com/
