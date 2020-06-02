@@ -662,50 +662,43 @@ void sampling_weights_test() {
 }
 
 void sampling_consistency_test() {
-  rng_state rng = make_rng(199382389514);
+  auto rng = make_rng(199382389514);
   for (auto beta_m = 0.2f; beta_m < 1.0f; beta_m += 0.2f)
     for (auto beta_n = 0.4f; beta_n < 1.0f; beta_n += 0.2f) {
       // Declare variables for hair sampling test
       const auto count   = 64 * 1024;
       auto       sigma_a = vec3f(.25);
       auto       wo      = sample_sphere(rand2f(rng));
-      auto       Li = [](const vec3f& w) -> vec3f { return vec3f(w.z * w.z); };
+      auto       li = [](const vec3f& w) -> vec3f { return vec3f(w.z * w.z); };
       auto       fImportance = vec3f(0), fUniform = vec3f(0);
       for (auto i = 0; i < count; ++i) {
         // Compute estimates of scattered radiance for hair sampling
         // test
 #ifdef YOCTO_EMBREE
-        auto h = -1.0f + 2.0f * rand1f(rng);
+        auto h = -1 + 2 * rand1f(rng);
 #else
         auto h = rand1f(rng);
 #endif
-        auto mat    = hair_material{};
-        mat.sigma_a = sigma_a;
-        mat.beta_m  = beta_m;
-        mat.beta_n  = beta_n;
-        mat.alpha   = 0.0f;
+        auto mat   = hair_material{};
+        mat.beta_m = beta_m;
+        mat.beta_n = beta_n;
+        mat.alpha  = 0;
 
-        auto brdf          = eval_hair_brdf(mat, h, zero3f, zero3f);
-        brdf.world_to_brdf = identity3x4f;
-        auto u             = rand2f(rng);
-        auto wi            = sample_hair_scattering(brdf, wo, u);
-        auto pdf           = sample_hair_scattering_pdf(brdf, wo, wi);
-        auto f             = eval_hair_scattering(brdf, wo, wi);
-        if (pdf > 0) fImportance += f * Li(wi) / (count * pdf);
+        auto brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
+        auto u    = rand2f(rng);
+        auto wi   = sample_hair_scattering(brdf, wo, u);
+        auto pdf  = sample_hair_scattering_pdf(brdf, wo, wi);
+        auto f    = eval_hair_scattering(brdf, wo, wi);
+        if (pdf > 0) fImportance += f * li(wi) / (count * pdf);
         wi = sample_sphere(u);
-        fUniform += eval_hair_scattering(brdf, wo, wi) * Li(wi) /
+        fUniform += eval_hair_scattering(brdf, wo, wi) * li(wi) /
                     (count * sample_sphere_pdf(zero3f));
       }
       // Verify consistency of estimated hair reflected radiance values
       auto err = abs(luminance(fImportance) - luminance(fUniform)) /
                  luminance(fUniform);
       // EXPECT_LT(err, 0.05);
-      if (err < 0.05f) {
-      } else {
-        printf("Err: %f\n", err);
-        fflush(stdout);
-        throw std::runtime_error("TEST FAILED!");
-      }
+      if (err >= 0.05f) throw std::runtime_error("TEST FAILED!");
     }
   printf("OK!\n");
   fflush(stdout);
