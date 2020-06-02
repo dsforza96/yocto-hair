@@ -588,41 +588,35 @@ void white_furnace_test() {
 }
 
 void white_furnace_sampled_test() {
-  rng_state rng = make_rng(199382389514);
-  vec3f     wo  = sample_sphere(rand2f(rng));
-  for (float beta_m = .1; beta_m < 1; beta_m += .2) {
-    for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+  auto rng = make_rng(199382389514);
+  auto wo  = sample_sphere(rand2f(rng));
+  for (auto beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.2f) {
+    for (auto beta_n = 0.1; beta_n < 1.0f; beta_n += 0.2f) {
       // Estimate reflected uniform incident radiance from hair
-      vec3f sum   = zero3f;
-      int   count = 300000;
-      for (int i = 0; i < count; ++i) {
+      auto sum   = zero3f;
+      auto count = 300000;
+      for (auto i = 0; i < count; ++i) {
 #ifdef YOCTO_EMBREE
-        float h = -1.0f + 2.0f * rand1f(rng);
+        auto h = -1 + 2 * rand1f(rng);
 #else
-        float h = rand1f(rng);
+        auto  h = rand1f(rng);
 #endif
-        vec3f         sigma_a = zero3f;
-        hair_material mat     = {};
-        mat.sigma_a           = sigma_a;
-        mat.beta_m            = beta_m;
-        mat.beta_n            = beta_n;
-        mat.alpha             = 0.0;
+        hair_material mat = {};
+        mat.beta_m        = beta_m;
+        mat.beta_n        = beta_n;
+        mat.alpha         = 0;
 
-        hair_brdf brdf     = eval_hair_brdf(mat, h, zero3f, zero3f);
-        brdf.world_to_brdf = identity3x4f;
-        brdf.sigma_a       = zero3f;
+        hair_brdf brdf = eval_hair_brdf(mat, h, {0, 0, 1}, {1, 0, 0});
 
-        vec3f wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
-        auto  pdf = sample_hair_scattering_pdf(brdf, wo, wi);
-        auto  f   = eval_hair_scattering(brdf, wo, wi);
+        auto wi  = sample_hair_scattering(brdf, wo, rand2f(rng));
+        auto pdf = sample_hair_scattering_pdf(brdf, wo, wi);
+        auto f   = eval_hair_scattering(brdf, wo, wi);
         // sum += eval_hair_scattering(brdf, zero3f, wo, wi) * abs(wi.z);
         if (pdf > 0) sum += f / pdf;
       }
-      float avg = luminance(sum) / (count);
-      if (avg >= .99 && avg <= 1.01) {
-      } else {
+      auto avg = luminance(sum) / (count);
+      if (!(avg >= .99 && avg <= 1.01))
         throw std::runtime_error("TEST FAILED!");
-      }
     }
   }
   printf("OK!\n");
