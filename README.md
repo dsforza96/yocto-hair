@@ -2,7 +2,7 @@
 
 **Authors:** [Antonio Musolino](https://github.com/antoniomuso) and [Davide Sforza](https://github.com/dsforza96).
 
-Yocto/Hair is a tiny extension of [Yocto/GL](https://github.com/xelatihy/yocto-gl) which allow to shade realistic looking hairs. 
+Yocto/Hair is a tiny extension of [Yocto/GL](https://github.com/xelatihy/yocto-gl) which allow to shade realistic-looking hairs. 
 Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 
 ![](images/hair_curls_1280_4096.png)
@@ -88,7 +88,7 @@ Same scene rendered with and without our extension:
 
 ![](images/bold_man_1280_1024.png)
 
-Example of scene which exploits both volumetric rendering for skin (already supported in Yocto/GL) and our extension for hair:
+Example scene which exploits volumetric rendering to shade skin together with the model we implemented to shade hair. This way it is possible to render realistic-looking humans:
 
 ```bash
 ./bin/yscenetrace tests/bold-man/bold-man.json -o out/bold-man.png -t path -s 1024 -r 1280
