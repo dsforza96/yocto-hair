@@ -38,8 +38,9 @@
 using namespace std::string_literals;
 
 #ifdef YOCTO_EMBREE
-#include <cstring>
 #include <embree3/rtcore.h>
+
+#include <cstring>
 #endif
 
 // -----------------------------------------------------------------------------

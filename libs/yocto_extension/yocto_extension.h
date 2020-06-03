@@ -119,7 +119,7 @@ vec3f eval_hair_scattering(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
 
 vec3f sample_hair_scattering(
-    const hair_brdf& brdf, const vec3f& outgoing, const vec2f& u2);
+    const hair_brdf& brdf, const vec3f& outgoing, const vec2f& rn);
 
 float sample_hair_scattering_pdf(
     const hair_brdf& brdf, const vec3f& outgoing, const vec3f& incoming);
