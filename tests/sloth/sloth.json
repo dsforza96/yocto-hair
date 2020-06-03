@@ -1,0 +1,177 @@
+{
+  "asset": {
+    "copyright": "Model by Funkmasterfresh from www.blendswap.com. HDRI by Greg Zaall from hdrihaven.com",
+    "generator": "Yocto/GL - https://github.com/xelatihy/yocto-gl"
+  },
+  "cameras": {
+    "camera": {
+      "aspect": 1.7777777910232544,
+      "focus": 30.40629005432129,
+      "lookat": [
+        8,
+        3,
+        18,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    }
+  },
+  "environments": {
+    "sky": {
+      "emission": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "emission_tex": "monks_forest"
+    }
+  },
+  "materials": {
+  "floor": {
+      "color": [
+        0.7,
+        0.7,
+        0.7
+      ],
+      "color_tex": "floor"
+    },
+    "hair-body": {
+      "color": [
+        0.119,
+        0.048,
+        0.008
+      ],
+      "beta_m": 0.6
+    },
+    "hair-eyebrows": {
+      "color": [
+        1,
+        0.697,
+        0.355
+      ],
+      "beta_m": 0.6
+    },
+    "hair-eyes": {
+       "eumelanin": 4,
+       "beta_m": 0.6
+    },
+    "hair-face": {
+      "color": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "beta_m": 0.6
+    },
+    "hair-head": {
+      "color": [
+        0.129,
+        0.058,
+        0.018
+      ],
+      "beta_m": 0.6
+    },
+    "toes": {
+      "color": [
+        0.8,
+        0.613,
+        0.321
+      ],
+      "specular": 1,
+      "roughness": 0.447
+    },
+    "body": {
+      "color": [
+        0.823,
+        0.516,
+        0.257
+      ]
+    },
+    "face": {
+      "color": [
+        0.015,
+        0.010,
+        0.005
+      ],
+      "roughness": 0.5,
+      "scanisotropy": -0.800000011920929,
+      "scattering": [
+        0.015,
+        0.010,
+        0.005
+      ],
+      "specular": 1.0,
+      "thin": false,
+      "transmission": 1.0,
+      "trdepth": 0.0010000000474974513
+    },
+    "eyes": {
+      "color": [
+        0.033,
+        0.014,
+        0.010
+      ],
+      "specular": 1
+    }
+  },
+  "objects": {
+  "floor": {
+      "shape": "floor",
+      "material": "floor",
+      "frame": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -1.5,
+        0
+      ]
+    },
+    "hair-body": {
+      "material": "hair-body",
+      "shape": "hair-body"
+    },
+    "hair-eyebrows": {
+      "material": "hair-eyebrows",
+      "shape": "hair-eyebrows"
+    },
+    "hair-eyes": {
+      "material": "hair-eyes",
+      "shape": "hair-eyes"
+    },
+    "hair-face": {
+      "material": "hair-face",
+      "shape": "hair-face"
+    },
+    "hair-head": {
+      "material": "hair-head",
+      "shape": "hair-head"
+    },
+    "toes": {
+      "material": "toes",
+      "shape": "toes"
+    },
+    "body": {
+      "material": "body",
+      "shape": "body"
+    },
+    "face": {
+      "material": "face",
+      "shape": "face"
+    },
+    "eyes": {
+      "material": "eyes",
+      "shape": "eyes"
+    }
+  }
+}

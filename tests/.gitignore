@@ -13,3 +13,15 @@ pbrt
 **/texture1.png
 **/texture2.png
 **/texture3.hdr
+
+**/body.ply
+**/eyes.ply
+**/face.ply
+**/floor.ply
+**/hair-body.ply
+**/hair-eyebrows.ply
+**/hair-eyes.ply
+**/hair-face.ply
+**/hair-head.ply
+**/toes.ply
+**/monks_forest.hdr
