@@ -1,6 +1,6 @@
 {
   "asset": {
-    "copyright": "Model by Funkmasterfresh from www.blendswap.com. HDRI by Greg Zaall from hdrihaven.com",
+    "copyright": "Model by Funkmasterfresh from www.blendswap.com",
     "generator": "Yocto/GL - https://github.com/xelatihy/yocto-gl"
   },
   "cameras": {
@@ -27,7 +27,7 @@
         0.8,
         0.8
       ],
-      "emission_tex": "monks_forest"
+      "emission_tex": "sky"
     }
   },
   "materials": {
