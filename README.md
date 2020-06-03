@@ -76,6 +76,9 @@ To render our scenes you have to download the hair models from [here](https://dr
 #
 
 ![](images/sloth_2048_1920.png)
+![](images/sloth_2048_1920.png)
+
+Same scene rendered with and without our extension.
 
 ```bash
 ./bin/yscenetrace tests/sloth/sloth.json -o out/sloth.png -t path -s 2048 -r 1920
