@@ -78,7 +78,7 @@ To render our scenes you have to download the hair models from [here](https://dr
 ![](images/sloth_2048_1920.png)
 ![](images/sloth_2048_1920.png)
 
-Same scene rendered with and without our extension.
+Same scene rendered with and without our extension:
 
 ```bash
 ./bin/yscenetrace tests/sloth/sloth.json -o out/sloth.png -t path -s 2048 -r 1920
@@ -87,6 +87,8 @@ Same scene rendered with and without our extension.
 #
 
 ![](images/bold_man_1280_1024.png)
+
+Example of scene which exploits both volumetric rendering for skin (already supported in Yocto/GL) and our extension for hair:
 
 ```bash
 ./bin/yscenetrace tests/bold-man/bold-man.json -o out/bold-man.png -t path -s 1024 -r 1280
