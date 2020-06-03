@@ -84,7 +84,7 @@ Same scene rendered with and without our extension.
 ./bin/yscenetrace tests/sloth/sloth.json -o out/sloth.png -t path -s 2048 -r 1920
 ```
 
-![](images/bold_man_720_2048.png)
+<p align="center"> <img src="images/bold_man_720_2048.png"> </p>
 
 Scene which exploits both subsurface scattering, to shade skin, and the model we implemented, to shade hair. This way it is possible to render realistic-looking humans.
 
