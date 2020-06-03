@@ -73,7 +73,7 @@ To render our scenes you have to download the hair models from [here](https://dr
 ./bin/yscenetrace tests/curly-hair/curly-hair.json -o out/curly-hair.png -t path -s 1536 -r 720
 ```
 
-#
+## Further Examples
 
 ![](images/sloth_2048_1920.png)
 ![](images/sloth_2048_1920.png)
@@ -84,11 +84,9 @@ Same scene rendered with and without our extension:
 ./bin/yscenetrace tests/sloth/sloth.json -o out/sloth.png -t path -s 2048 -r 1920
 ```
 
-#
-
 ![](images/bold_man_1280_1024.png)
 
-Scene which exploits both subsurface scattering to shade skin and the model we implemented to shade hair. This way it is possible to render realistic-looking humans:
+Scene which exploits both subsurface scattering, to shade skin, and the model we implemented, to shade hair. This way it is possible to render realistic-looking humans:
 
 ```bash
 ./bin/yscenetrace tests/bold-man/bold-man.json -o out/bold-man.png -t path -s 1024 -r 1280
