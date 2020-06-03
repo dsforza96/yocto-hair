@@ -1,7 +1,6 @@
 {
   "asset": {
-    "copyright": "Model by Funkmasterfresh from www.blendswap.com",
-    "generator": "Yocto/GL - https://github.com/xelatihy/yocto-gl"
+    "copyright": "Model by Funkmasterfresh from www.blendswap.com"
   },
   "cameras": {
     "camera": {
@@ -23,9 +22,9 @@
   "environments": {
     "sky": {
       "emission": [
-        0.8,
-        0.8,
-        0.8
+        0.1,
+        0.1,
+        0.1
       ],
       "emission_tex": "sky"
     }
@@ -45,7 +44,7 @@
         0.048,
         0.008
       ],
-      "beta_m": 0.6
+      "beta_m": 0.4
     },
     "hair-eyebrows": {
       "color": [
@@ -53,11 +52,15 @@
         0.697,
         0.355
       ],
-      "beta_m": 0.6
+      "beta_m": 0.4
     },
     "hair-eyes": {
-       "eumelanin": 4,
-       "beta_m": 0.6
+      "color": [
+        0.015,
+        0.010,
+        0.005
+      ],
+      "beta_m": 0.4
     },
     "hair-face": {
       "color": [
@@ -65,7 +68,7 @@
         0.4,
         0.4
       ],
-      "beta_m": 0.6
+      "beta_m": 0.4
     },
     "hair-head": {
       "color": [
@@ -73,7 +76,7 @@
         0.058,
         0.018
       ],
-      "beta_m": 0.6
+      "beta_m": 0.4
     },
     "toes": {
       "color": [
@@ -89,7 +92,18 @@
         0.823,
         0.516,
         0.257
-      ]
+      ],
+      "roughness": 0.5,
+      "scanisotropy": -0.800000011920929,
+      "scattering": [
+        0.823,
+        0.516,
+        0.257
+      ],
+      "specular": 1.0,
+      "thin": false,
+      "transmission": 1.0,
+      "trdepth": 0.0010000000474974513
     },
     "face": {
       "color": [
@@ -116,6 +130,13 @@
         0.010
       ],
       "specular": 1
+    },
+    "arealight": {
+      "emission": [
+        40,
+        40,
+        40
+      ]
     }
   },
   "objects": {
@@ -172,6 +193,36 @@
     "eyes": {
       "material": "eyes",
       "shape": "eyes"
+    },
+    "arealight1": {
+      "lookat": [
+        12,
+        5,
+        20,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "shape": "arealight",
+      "material": "arealight"
+    },
+    "arealight2": {
+      "lookat": [
+        4,
+        5,
+        20,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "shape": "arealight",
+      "material": "arealight"
     }
   }
 }
