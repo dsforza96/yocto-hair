@@ -86,7 +86,7 @@ Same scene rendered with and without our extension.
 
 #
 
-![](images/bold-man_1024_1280.png)
+![](images/bold_man_1280_1024.png)
 
 ```bash
 ./bin/yscenetrace tests/bold-man/bold-man.json -o out/bold-man.png -t path -s 1024 -r 1280
