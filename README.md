@@ -88,7 +88,7 @@ Same scene rendered with and without our extension:
 
 ![](images/bold_man_1280_1024.png)
 
-Example scene which exploits volumetric rendering to shade skin together with the model we implemented to shade hair. This way it is possible to render realistic-looking humans:
+Scene which exploits both subsurface scattering to shade skin and the model we implemented to shade hair. This way it is possible to render realistic-looking humans:
 
 ```bash
 ./bin/yscenetrace tests/bold-man/bold-man.json -o out/bold-man.png -t path -s 1024 -r 1280
