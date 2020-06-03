@@ -14,6 +14,10 @@ License for model files.
     - downloaded from Benedikt Bitterli's Rendering Resources: https://benedikt-bitterli.me/resources/
 4. hair-block
     - downloaded from Scenes for pbrt-v3: https://www.pbrt.org/scenes-v3.html
-5. bold-man
+5. sloth
+    - model by Funkmasterfresh
+    - cc0
+    - downloaded from Blend Swap: https://www.blendswap.com/
+6. bold-man
     - license in file bold-man/license.txt
     - downloaded from 3DScanStore: https://www.3dscanstore.com/

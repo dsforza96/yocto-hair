@@ -81,6 +81,8 @@ To render our scenes you have to download the hair models from [here](https://dr
 ./bin/yscenetrace tests/sloth/sloth.json -o out/sloth.png -t path -s 2048 -r 1920
 ```
 
+#
+
 ![](images/bold_man_1280_1024.png)
 
 ```bash
