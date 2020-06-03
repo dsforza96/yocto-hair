@@ -87,7 +87,7 @@ using math::zero4i;
 // -----------------------------------------------------------------------------
 namespace yocto::extension {
 
-static const float sqrt_pi_over_8f = 0.626657069f;
+inline const float sqrt_pi_over_8f = 0.626657069f;
 
 inline float sqr(float v) { return v * v; }
 inline vec3f sqr(vec3f v) { return v * v; }
@@ -212,6 +212,7 @@ static std::array<vec3f, p_max + 1> ap(
   // Compute $p=0$ attenuation at initial cylinder intersection
   auto cos_gamma_o = safe_sqrt(1 - h * h);
   auto cos_theta   = cos_theta_o * cos_gamma_o;
+
   // fresnel_dielectric(eta, cos_theta): we hack function's parameters bulding
   // two vectors s.t. their dot product gives exactly cos_theta
   auto f = fresnel_dielectric(eta, {0, 0, 1}, {0, 0, cos_theta});
@@ -329,11 +330,8 @@ vec3f eval_hair_scattering(
   // Compute contribution of remaining terms after _pMax_
   fsum += mp(cos_theta_i, cos_theta_o, sin_theta_i, sin_theta_o, v[p_max]) *
           ap[p_max] / (2 * pif);
-
   // if (abs(incoming.z) > 0)
   //   fsum /= abs(incoming.z);
-  // return fsum * abs(incoming.z);
-
   return fsum;
 }
 
@@ -568,8 +566,9 @@ void white_furnace_test() {
 #else
         auto h = rand1f(rng);
 #endif
-        // the original pbrt test fails with h = 0
+        // the original pbrt test fails when h == 0
         if (h == 0) h += flt_eps;
+
         auto mat   = hair_material{};
         mat.beta_m = beta_m;
         mat.beta_n = beta_n;

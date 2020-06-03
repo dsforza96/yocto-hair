@@ -81,7 +81,7 @@ using math::zero3f;
 // -----------------------------------------------------------------------------
 namespace yocto::extension {
 
-static const int p_max = 3;
+inline const int p_max = 3;
 
 struct hair_material {
   vec3f sigma_a     = zero3f;
