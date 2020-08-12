@@ -2,7 +2,7 @@
 
 **Authors:** [Antonio Musolino](https://github.com/antoniomuso) and [Davide Sforza](https://github.com/dsforza96).
 
-Yocto/Hair is a tiny extension of [Yocto/GL](https://github.com/xelatihy/yocto-gl) which allow to shade realistic-looking hair. 
+Yocto/Hair is a tiny extension of [Yocto/GL](https://github.com/xelatihy/yocto-gl) which allows to shade realistic-looking hair. 
 Our code follows the [pbrt](https://www.pbrt.org/hair.pdf) implementation.
 
 ![](images/hair_curls_1280_4096.png)
